@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.components.number import NumberMode, RestoreNumber
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
@@ -52,8 +52,13 @@ async def async_setup_entry(
     entry.async_on_unload(coordinator.async_add_listener(_add_new))
 
 
-class TsunNumber(TsunEntity, NumberEntity):
-    """Zahlenwert, der per MQTT an den Proxy gesendet wird."""
+class TsunNumber(TsunEntity, RestoreNumber):
+    """Zahlenwert, der per MQTT an den Proxy gesendet wird.
+
+    Als ``RestoreNumber`` übersteht der gesetzte Wert einen HA-Neustart.
+    Ohne Wiederherstellung fiel die AT-Befehlsrate sonst auf den Standard
+    zurück, obwohl der Proxy den alten Wert noch verwendet.
+    """
 
     def __init__(
         self,
@@ -76,6 +81,16 @@ class TsunNumber(TsunEntity, NumberEntity):
             self._attr_native_max_value = spec.max_value
         if spec.icon:
             self._attr_icon = spec.icon
+
+    async def async_added_to_hass(self) -> None:
+        """Stellt den zuletzt gesetzten Wert nach einem Neustart wieder her."""
+        await super().async_added_to_hass()
+        last = await self.async_get_last_number_data()
+        if last is None or last.native_value is None:
+            return
+        value = float(last.native_value)
+        if self.native_min_value <= value <= self.native_max_value:
+            self._value = value
 
     @property
     def native_value(self) -> float:

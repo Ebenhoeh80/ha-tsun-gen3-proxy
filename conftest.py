@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import sys
 import types
+from types import SimpleNamespace
 
 
 def _package(name: str) -> types.ModuleType:
@@ -51,6 +52,42 @@ class _Base:
 
     def async_write_ha_state(self) -> None:
         """Stub."""
+
+    async def async_added_to_hass(self) -> None:
+        """Stub: Restore-Entitäten rufen dies beim Hinzufügen auf."""
+        if not hasattr(self, "hass"):
+            self.hass = None
+
+    async def async_will_remove_from_hass(self) -> None:
+        """Stub: Entitäten rufen dies beim Entfernen auf."""
+
+    async def async_get_last_number_data(self):
+        """Stub: kein gespeicherter Zahlenwert in der Testumgebung."""
+        return
+
+    async def async_get_last_state(self):
+        """Stub: kein gespeicherter Zustand in der Testumgebung."""
+        return
+
+
+class _NumberEntity(_Base):
+    """Stub mit den Properties, die RestoreNumber beim Wiederherstellen liest."""
+
+    @property
+    def native_min_value(self) -> float:
+        return getattr(self, "_attr_native_min_value", 0.0)
+
+    @property
+    def native_max_value(self) -> float:
+        return getattr(self, "_attr_native_max_value", 100.0)
+
+
+class _SelectEntity(_Base):
+    """Stub mit der Options-Property, die RestoreSelect prüft."""
+
+    @property
+    def options(self) -> list[str]:
+        return list(getattr(self, "_attr_options", []))
 
 
 class _ConfigFlow(_Base):
@@ -131,19 +168,46 @@ _module(
     BinarySensorEntity=_Base,
     BinarySensorDeviceClass=_identity,
 )
-_module("homeassistant.components.number", NumberEntity=_Base, NumberMode=_Base)
-_module("homeassistant.components.select", SelectEntity=_Base)
+_module(
+    "homeassistant.components.number",
+    NumberEntity=_NumberEntity,
+    NumberMode=SimpleNamespace(BOX="box"),
+    RestoreNumber=_NumberEntity,
+)
+_module(
+    "homeassistant.components.select",
+    SelectEntity=_SelectEntity,
+    RestoreSelect=_SelectEntity,
+)
 _module("homeassistant.components.update", UpdateEntity=_Base)
 
 helpers = _package("homeassistant.helpers")
-_module("homeassistant.helpers.entity", EntityCategory=_identity)
+_module(
+    "homeassistant.helpers.entity",
+    EntityCategory=SimpleNamespace(CONFIG="config", DIAGNOSTIC="diagnostic"),
+)
 _module("homeassistant.helpers.entity_platform", AddEntitiesCallback=object)
 _module("homeassistant.helpers.device_registry", DeviceInfo=lambda **kwargs: kwargs)
 _module("homeassistant.helpers.selector", selector=lambda schema: schema)
 _module(
+    "homeassistant.helpers.aiohttp_client",
+    async_get_clientsession=lambda hass: None,
+)
+_module(
+    "homeassistant.helpers.event",
+    async_track_time_interval=lambda hass, action, interval: (lambda: None),
+)
+_module(
     "homeassistant.helpers.update_coordinator",
     DataUpdateCoordinator=_Coordinator,
     CoordinatorEntity=_Base,
+)
+_module(
+    "aiohttp",
+    ClientError=type("ClientError", (Exception,), {}),
+    ClientTimeout=type(
+        "ClientTimeout", (), {"__init__": lambda self, **kwargs: None}
+    ),
 )
 _module(
     "aiomqtt",

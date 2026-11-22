@@ -94,5 +94,7 @@ class TsunCoordinator(DataUpdateCoordinator[DataT]):
             self.hass,
             f"{TOPIC_PREFIX}/{node_id}/{topic}",
             value,
-            retain=True,
+            # Kein Retain: sonst würde ein alter Befehl nach einem
+            # Proxy-Neustart erneut angewendet (HA-Best-Practice für Commands).
+            retain=False,
         )

@@ -121,3 +121,19 @@ def test_setup_abonniert_erst_nach_mqtt_client() -> None:
         asyncio.run(coordinator.async_setup())
     subscribe.assert_awaited_once()
     assert coordinator._unsubscribe is unsubscribe
+
+
+def test_befehl_wird_nicht_retainiert() -> None:
+    """Steuer-Kommandos dürfen nicht im Broker hängen bleiben."""
+    coordinator = _coordinator()
+    with patch(
+        "custom_components.tsun.coordinator.mqtt.async_publish",
+        new=AsyncMock(),
+    ) as publish:
+        asyncio.run(
+            coordinator.async_send_command("inv1", "set_at_rate_limit", "30")
+        )
+    publish.assert_awaited_once()
+    assert publish.await_args is not None
+    assert publish.await_args.args[1] == "tsun/inv1/set_at_rate_limit"
+    assert publish.await_args.kwargs["retain"] is False

@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from unittest.mock import AsyncMock, patch
 
 from custom_components.tsun.const import CONF_LATEST_VERSION, PROXY_NODE, VERSION
-from custom_components.tsun.update import async_setup_entry
+from custom_components.tsun.update import (
+    ReleaseInfo,
+    async_fetch_release,
+    async_setup_entry,
+)
 
 
 class _Entry:
@@ -102,3 +107,38 @@ def test_update_unique_id_ist_unabhaengig_vom_knoten() -> None:
     assert first[0]._attr_unique_id == second[0]._attr_unique_id
     assert "inv_1" not in first[0]._attr_unique_id
     assert "inv_2" not in second[0]._attr_unique_id
+
+
+def test_github_release_wird_uebernommen() -> None:
+    """Die Update-Entität zeigt die vom GitHub-Release gemeldete Version."""
+    entity = _entities({}, {})[0]
+    info = ReleaseInfo(
+        tag="9.9.9",
+        url="https://github.com/example/release",
+        summary="Neue Funktionen",
+    )
+    with patch(
+        "custom_components.tsun.update.async_fetch_release",
+        new=AsyncMock(return_value=info),
+    ):
+        asyncio.run(entity.async_added_to_hass())
+    assert entity._attr_latest_version == "9.9.9"
+    assert entity._attr_release_url == "https://github.com/example/release"
+    assert entity._attr_release_summary == "Neue Funktionen"
+
+
+def test_manual_version_verhindert_github_abfrage() -> None:
+    """Ein manuell gesetzter Wert bleibt maßgeblich und spart die Abfrage."""
+    entity = _entities({}, {CONF_LATEST_VERSION: "1.2.3"})[0]
+    with patch(
+        "custom_components.tsun.update.async_fetch_release",
+        new=AsyncMock(),
+    ) as fetch:
+        asyncio.run(entity.async_added_to_hass())
+    fetch.assert_not_awaited()
+    assert entity._attr_latest_version == "1.2.3"
+
+
+def test_fetch_release_ohne_session_kein_fehler() -> None:
+    """Ohne HTTP-Session (Testumgebung) bleibt die Version unverändert."""
+    assert asyncio.run(async_fetch_release(object())) is None

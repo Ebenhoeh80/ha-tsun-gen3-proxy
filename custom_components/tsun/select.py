@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from homeassistant.components.select import SelectEntity
+from homeassistant.components.select import RestoreSelect
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
@@ -50,8 +50,12 @@ async def async_setup_entry(
     entry.async_on_unload(coordinator.async_add_listener(_add_new))
 
 
-class TsunSelect(TsunEntity, SelectEntity):
-    """Auswahlwert, der per MQTT an den Proxy gesendet wird."""
+class TsunSelect(TsunEntity, RestoreSelect):
+    """Auswahlwert, der per MQTT an den Proxy gesendet wird.
+
+    Als ``RestoreSelect`` bleibt die getroffene Auswahl auch nach einem
+    HA-Neustart erhalten und muss nicht erneut gesetzt werden.
+    """
 
     def __init__(
         self,
@@ -68,6 +72,13 @@ class TsunSelect(TsunEntity, SelectEntity):
         self._attr_options = list(spec.options)
         if spec.icon:
             self._attr_icon = spec.icon
+
+    async def async_added_to_hass(self) -> None:
+        """Stellt die zuletzt gültige Auswahl nach einem Neustart wieder her."""
+        await super().async_added_to_hass()
+        last = await self.async_get_last_state()
+        if last is not None and last.state in self.options:
+            self._value = last.state
 
     @property
     def current_option(self) -> str | None:

@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/Ebenhoeh80/ha-tsun-inverter/issues",
   "loggers": ["custom_components.tsun"],
   "requirements": [],
-  "version": "0.2.3"
+  "version": "0.2.4"
 }

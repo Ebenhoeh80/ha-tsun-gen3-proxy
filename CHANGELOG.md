@@ -31,6 +31,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-11-22
+
+### Added
+
+- Die Update-Entität fragt das neueste GitHub-Release ab (alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung dynamisch an. Ein manuell gesetzter Wert in `entry.data`/Optionen bleibt als Offline-Fallback maßgeblich.
+
+### Changed
+
+- `at_rate_limit` und `acl_mode` sind jetzt `RestoreNumber`/`RestoreSelect`: gesetzte Werte überstehen einen HA-Neustart und werden auf gültige Wertebereiche geprüft.
+- MQTT-Steuer-Kommandos werden mit `retain=False` veröffentlicht, damit veraltete Befehle nicht nach einem Proxy-Neustart erneut angewendet werden.
+
+### Fixed
+
+- Die Update-Entität zeigt nicht mehr dauerhaft eine statisch konfigurierte Version, sondern den tatsächlich verfügbaren Release-Stand.
+
 ## [0.2.1] - 2026-11-22
 
 ### Fixed
