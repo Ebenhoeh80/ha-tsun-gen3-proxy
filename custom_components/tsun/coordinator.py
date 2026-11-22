@@ -53,11 +53,11 @@ class TsunCoordinator(DataUpdateCoordinator[DataT]):
         parsed = parse_topic(str(message.topic))
         if parsed is None:
             return
-        node_id, _group = parsed
+        node_id, group = parsed
 
         updates: dict[str, Any] = {}
         for key, raw_value in extract_values(message.payload).items():
-            spec = spec_for_key(key)
+            spec = spec_for_key(key, group)
             if spec is None:
                 continue
             state = format_state(raw_value, spec)

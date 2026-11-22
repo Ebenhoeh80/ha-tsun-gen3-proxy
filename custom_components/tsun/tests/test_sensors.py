@@ -28,6 +28,16 @@ def test_spec_for_key_findet_aliase():
     assert spec_for_key("gibts_nicht") is None
 
 
+def test_spec_for_key_prueft_topic_gruppe():
+    """Gleich lautende Schlüssel werden über die Gruppe unterschieden."""
+    assert spec_for_key("Daily_Generation", "total") is not None
+    assert spec_for_key("Daily_Generation", "input") is None
+    assert spec_for_key("Rated_Power", "inverter") is not None
+    assert spec_for_key("Rated_Power", "input") is None
+    assert spec_for_key("SW_Exception", "proxy") is not None
+    assert spec_for_key("SW_Exception", "total") is None
+
+
 def test_unique_id_ist_stabil():
     """Eindeutige IDs dürfen sich bei Leerzeichen nicht ändern."""
     spec = spec_for_key("Daily_Generation")

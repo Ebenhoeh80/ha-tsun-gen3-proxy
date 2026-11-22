@@ -3,7 +3,10 @@
 import json
 from pathlib import Path
 
+from custom_components.tsun.const import VERSION
+
 _MANIFEST = Path(__file__).resolve().parents[1] / "manifest.json"
+# Schlüssel des hassfest-Schemas für Custom Integrations (ohne `keywords`).
 _ALLOWED_KEYS = {
     "domain",
     "name",
@@ -17,7 +20,6 @@ _ALLOWED_KEYS = {
     "requirements",
     "dependencies",
     "after_dependencies",
-    "keywords",
     "quality_scale",
     "loggers",
 }
@@ -40,6 +42,7 @@ def test_manifest_version_und_codeowners():
     """Version und Codeowner müssen gesetzt sein."""
     data = json.loads(_MANIFEST.read_text(encoding="utf-8"))
     assert data["version"].count(".") == 2
+    assert data["version"] == VERSION
     assert data["codeowners"] and all(
         owner.startswith("@") for owner in data["codeowners"]
     )

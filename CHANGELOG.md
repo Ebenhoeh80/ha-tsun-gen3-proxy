@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
+## [0.2.1] - 2026-11-22
+
+### Fixed
+
+- PV-Werte aus `tsun/<knoten>/input` überschrieben die Wechselrichter-Summen aus `tsun/<knoten>/total`; Messwerte werden jetzt nach Topic-Gruppe zugeordnet
+- `const.VERSION` und Manifest auf 0.2.1 angeglichen; Update-Entität berücksichtigt auch `entry.data`
+- Nicht zulässiger Manifest-Schlüssel `keywords` entfernt; `hassfest` als zusätzlicher CI-Job
+
+### Changed
+
+- README und RELEASE_NOTES: Hinweis, dass MQTT-Host/-Port und Zugangsdaten nicht verwendet werden; veralteter 0.1.0-Block in den Release-Hinweisen auf eine historische Notiz reduziert
+
 ## [0.2.0] - 2026-11-22
 
 ### Added
@@ -20,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 ### Changed
 
 - Eigener MQTT-Client und State-Store-Manipulation durch HA-MQTT-Integration und echte Entitäten ersetzt
-- Manifest auf HA-zulässige Schlüssel reduziert: `dependencies: [\"mqtt\"]`, `requirements: []`, `iot_class: local_push`
+- Manifest auf HA-zulässige Schlüssel reduziert: `dependencies: ["mqtt"]`, `requirements: []`, `iot_class: local_push`
 - Alte Platzhaltermodule (`mqtt_handler.py`, `*_setup.py`, `repair.py`) entfernt
 - Dokumentation und Release-Notizen auf das neue HACS-Repo umgestellt
 - Repo- und Anzeigename auf `ha-tsun-inverter` bzw. „TSUN Inverter" umgestellt (vom früheren Arbeitsnamen `ha-tsun-gen3-proxy`)
@@ -32,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Geräteidentifikatoren und eindeutige IDs sanitisiert, Config Entry im Koordinator übergeben
 
 ## [0.1.0] - 2026-11-21
+
+> Historisch: v0.1.0 war ein Gerüst mit Platzhaltertests und nicht verdrahtetem MQTT-Handler. Die unten aufgeführten Funktionen wurden erst mit 0.2.0 tatsächlich umgesetzt.
 
 ### Added
 

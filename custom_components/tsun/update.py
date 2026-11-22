@@ -40,7 +40,11 @@ async def async_setup_entry(
                     entry.entry_id,
                     node_id,
                     specs[0],
-                    str(entry.options.get(CONF_LATEST_VERSION, VERSION)),
+                    str(
+                        entry.data.get(CONF_LATEST_VERSION)
+                        or entry.options.get(CONF_LATEST_VERSION)
+                        or VERSION
+                    ),
                 )
             ]
         )

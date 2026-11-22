@@ -16,7 +16,7 @@ Home-Assistant-Integration für TSUN-Gen3/Gen3+-Wechselrichter und Batterien. Si
 2. `https://github.com/Ebenhoeh80/ha-tsun-inverter` als Typ **Integration** hinzufügen.
 3. „TSUN Inverter" suchen, installieren und Home Assistant neu starten.
 4. **Einstellungen → Geräte & Dienste → Integration hinzufügen** → „TSUN Inverter" auswählen.
-5. MQTT-Host, -Port und optional Benutzer/Passwort sowie die Knoten-ID eingeben.
+5. Die Knoten-ID angeben. Host, Port und Zugangsdaten werden für die MQTT-Verbindung nicht benötigt – diese läuft über die Home-Assistant-MQTT-Integration.
 
 ## Manuelle Installation
 

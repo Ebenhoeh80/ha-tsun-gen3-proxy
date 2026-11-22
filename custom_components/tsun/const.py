@@ -27,7 +27,6 @@ CONF_AT_RATE_LIMIT = "at_rate_limit"
 DEFAULT_HOST = "mqtt"
 DEFAULT_PORT = 1883
 DEFAULT_NODE_ID = "inverter"
-DEFAULT_VERSION = "0.1.0"
 DEFAULT_AT_RATE_LIMIT = 0
 
 TOPIC_PREFIX = "tsun"
@@ -65,4 +64,5 @@ UNIT_RATE = "cmd/min"
 
 DEVICE_IDENTIFIERS = (DOMAIN, "proxy")
 LOGGER = "custom_components.tsun"
-VERSION = "0.1.0"
+VERSION = "0.2.1"
+DEFAULT_VERSION = VERSION

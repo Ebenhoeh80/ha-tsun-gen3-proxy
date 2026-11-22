@@ -46,6 +46,9 @@ class EntitySpec:
     options: tuple[str, ...] = ()
     min_value: float | None = None
     max_value: float | None = None
+    # Leer = jede Topic-Gruppe. Eingeschränkte Gruppen verhindern, dass
+    # verschachtelte PV-Werte die Wechselrichter-Summen überschreiben.
+    groups: tuple[str, ...] = ()
 
 
 ENTITY_SPECS: tuple[EntitySpec, ...] = (
@@ -57,6 +60,7 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         unit=UNIT_WATT,
         state_class=STATE_CLASS_MEASUREMENT,
         icon="mdi:solar-power",
+        groups=("inverter",),
     ),
     EntitySpec(
         ("Daily_Generation", "total_generation_today"),
@@ -67,6 +71,7 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         device_class="energy",
         state_class=STATE_CLASS_TOTAL_INCREASING,
         icon="mdi:solar-power-variant",
+        groups=("total",),
     ),
     EntitySpec(
         ("Total_Generation", "total_generation_total"),
@@ -77,6 +82,7 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         device_class="energy",
         state_class=STATE_CLASS_TOTAL_INCREASING,
         icon="mdi:solar-power",
+        groups=("total",),
     ),
     EntitySpec(
         ("SW_Exception", "sw_exception"),
@@ -87,6 +93,7 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         icon="mdi:counter",
+        groups=("proxy",),
     ),
     EntitySpec(
         ("AT_Command_Blocked", "at_command_blocked"),
@@ -97,6 +104,7 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         icon="mdi:alert",
+        groups=("proxy",),
     ),
     EntitySpec(
         ("mqtt_published",),
@@ -194,7 +202,8 @@ def extract_values(payload: bytes | bytearray | str) -> dict[str, Any]:
 
     Der Proxy sendet JSON-Objekte, teils verschachtelt (z. B.
     ``{"pv1": {"Daily_Generation": 1.2}}``). Reine Zahlen landen unter
-    ``value``.
+    ``value``. Welche Werte übernommen werden, entscheidet ``spec_for_key``
+    anhand der Topic-Gruppe.
     """
     if isinstance(payload, (bytes, bytearray)):
         text = payload.decode("utf-8", errors="replace")
@@ -217,9 +226,19 @@ def extract_values(payload: bytes | bytearray | str) -> dict[str, Any]:
     return {"value": decoded}
 
 
-def spec_for_key(key: str) -> EntitySpec | None:
-    """Findet die Entitätsdefinition zu einem Messwert-Schlüssel."""
-    return _SPEC_BY_KEY.get(key)
+def spec_for_key(key: str, group: str | None = None) -> EntitySpec | None:
+    """Findet die Entitätsdefinition zu einem Messwert-Schlüssel.
+
+    Ist ``group`` angegeben, werden nur Entitäten akzeptiert, die für diese
+    Topic-Gruppe vorgesehen sind. So können ``pv1.Daily_Generation`` und
+    ``total.Daily_Generation`` nicht dieselbe Entität überschreiben.
+    """
+    spec = _SPEC_BY_KEY.get(key)
+    if spec is None:
+        return None
+    if group is not None and spec.groups and group not in spec.groups:
+        return None
+    return spec
 
 
 def unique_id(entry_id: str, node_id: str, spec: EntitySpec) -> str:
