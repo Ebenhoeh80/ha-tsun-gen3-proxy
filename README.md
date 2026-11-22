@@ -51,4 +51,4 @@ Die Unit-Tests prüfen die reine Logik mit Stubs. Für einen vollständigen HA-T
 
 ## Lizenz
 
-Apache-2.0. Der TSUN-Gen3-Proxy selbst bleibt unter seiner ursprünglichen Lizenz.
+MIT. Der TSUN-Gen3-Proxy selbst bleibt unter seiner ursprünglichen Lizenz.

@@ -3,7 +3,7 @@
 ## Home Assistant
 - Lizenz: GPL-3.0-or-later
 - Quelle: https://github.com/home-assistant/core
-- Hinweis: Die Integration läuft innerhalb von Home Assistant, ist aber separat unter Apache-2.0 lizenziert.
+- Hinweis: Die Integration läuft innerhalb von Home Assistant, ist aber separat unter MIT lizenziert.
 
 ## MQTT-Integration von Home Assistant
 - Lizenz: GPL-3.0-or-later
