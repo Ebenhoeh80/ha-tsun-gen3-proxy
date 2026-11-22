@@ -6,8 +6,8 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import selector
 
 from .const import (
@@ -34,7 +34,7 @@ class TsunConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Fragt die MQTT-Verbindung ab."""
         errors: dict[str, str] = {}
 
@@ -89,7 +89,7 @@ class TsunOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """Zeigt und speichert die Optionen."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)

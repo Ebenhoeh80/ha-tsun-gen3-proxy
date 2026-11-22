@@ -90,6 +90,7 @@ config_entries = _module(
     "homeassistant.config_entries",
     ConfigEntry=_Base,
     ConfigFlow=_ConfigFlow,
+    ConfigFlowResult=dict,
     OptionsFlow=_OptionsFlow,
 )
 _module("homeassistant.data_entry_flow", FlowResult=dict)
