@@ -9,7 +9,7 @@
 
 ### Hauptänderungen
 
-- Options-Default `latest_version` entfernt; die Update-Abfrage funktioniert jetzt ohne statischen Fallback-Wert und liefert den aktuellen Release-Stand.
+- Options-Default `latest_version` entfernt; die GitHub-Abfrage liefert den aktuellen Release-Stand. Ein Legacy-Wert aus einem alten Config Entry bleibt als Ausweichwert, `DEFAULT_VERSION` ist nur der Startwert bis zur ersten Abfrage.
 - Koordinator mit `PARALLEL_UPDATES` und Laufzeitdaten über `entry.runtime_data` statt `hass.data`.
 - Device-Remove-Hook ergänzt, damit entfernte Geräte auch aus der Registrierung verschwinden.
 - Numerische Sensoren liefern echte Zahlen statt formatierter Strings; Leistungswerte nutzen die Device-Class `power`, die Update-Entität `firmware`.
@@ -44,7 +44,7 @@ Lokal grün: 61 Tests, Ruff-Lint, Ruff-Format, MyPy und Coverage (76 % der Integ
 Diese Version verbessert ~~zwei Punkte~~ (korrigiert 22.11.2026: es sind drei Punkte) nach Home-Assistant-Best-Practices:
 
 - **AT-Befehlsrate und Zugriffsmodus:** `at_rate_limit` nutzt jetzt `RestoreNumber`, `acl_mode` kombiniert `SelectEntity` und `RestoreEntity`. Ein gesetzter Wert bleibt nach einem HA-Neustart erhalten; unplausible gespeicherte Werte werden verworfen. ~~Die erste Fassung dieser Hinweise nannte `RestoreSelect`.~~ (korrigiert 22.11.2026: `RestoreSelect` existiert in Home Assistant nicht; maßgeblich sind `RestoreNumber` sowie `SelectEntity` + `RestoreEntity`.)
-- **Neueste Version:** Die Update-Entität fragt das aktuelle GitHub-Release ab (bei Start und alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung an. ~~Ein manuell gesetzter Wert in den Optionen bleibt als Offline-Fallback erhalten.~~ (korrigiert 22.11.2026: mit 0.3.0 wurde der Options-Wert `latest_version` entfernt; die Abfrage läuft ohne statischen Fallback.)
+- **Neueste Version:** Die Update-Entität fragt das aktuelle GitHub-Release ab (bei Start und alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung an. ~~Ein manuell gesetzter Wert in den Optionen bleibt als Offline-Fallback erhalten.~~ (korrigiert 22.11.2026: mit 0.3.0 wurde der Options-Wert `latest_version` entfernt; nur ein Legacy-Wert aus einem alten Config Entry bleibt als Ausweichwert.)
 - **Steuer-Kommandos:** MQTT-Befehle werden mit `retain=false` gesendet, damit ein alter Befehl nach einem Proxy-Neustart nicht erneut wirksam wird.
 
 Die Änderungen aus 0.2.2 und 0.2.3 bleiben unverändert gültig.

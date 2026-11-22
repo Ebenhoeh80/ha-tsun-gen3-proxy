@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
 ### Changed
 
-- Options-Default `latest_version` entfernt; die Update-Abfrage funktioniert jetzt ohne statischen Fallback-Wert und liefert den aktuellen Release-Stand.
+- Options-Default `latest_version` entfernt; die GitHub-Abfrage liefert den aktuellen Release-Stand. Ein Legacy-Wert aus einem alten Config Entry bleibt als Ausweichwert, `DEFAULT_VERSION` ist nur der Startwert bis zur ersten Abfrage.
 - Alle Plattformen mit `PARALLEL_UPDATES` versehen und Laufzeitdaten über `entry.runtime_data` statt `hass.data` bereitgestellt.
 - Device-Remove-Hook ergänzt, damit entfernte Geräte auch aus der Registrierung verschwinden.
 - Numerische Sensoren liefern echte Zahlen statt formatierter Strings; Leistungswerte nutzen die Device-Class `power`, die Update-Entität `firmware`.
