@@ -33,7 +33,7 @@ def _latest(data: dict[str, Any], options: dict[str, Any] | None = None) -> tupl
         async_setup_entry(
             _Hass(),  # type: ignore[arg-type]
             _Entry(data, options),  # type: ignore[arg-type]
-            lambda items: entities.extend(items),
+            lambda items: entities.extend(items),  # type: ignore[arg-type]
         )
     )
     assert len(entities) == 1
