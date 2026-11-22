@@ -1,11 +1,11 @@
-"""Konstanten für die TSUN-Gen3-Proxy-Integration."""
+"""Konstanten für die TSUN-Inverter-Integration."""
 
 from __future__ import annotations
 
 DOMAIN = "tsun"
-NAME = "TSUN-Gen3-Proxy"
+NAME = "TSUN Inverter"
 MANUFACTURER = "TSUN"
-MODEL = "TSUN-Gen3-Proxy"
+MODEL = "TSUN Gen3"
 
 PLATFORMS: tuple[str, ...] = (
     "sensor",

@@ -1,4 +1,4 @@
-"""TSUN-Gen3-Proxy Home Assistant integration."""
+"""TSUN Inverter Home Assistant integration."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(LOGGER)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up TSUN-Gen3-Proxy from a config entry."""
+    """Set up TSUN Inverter from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
     coordinator = TsunCoordinator(hass, entry)
@@ -26,7 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
-    _LOGGER.info("TSUN-Gen3-Proxy %s initialisiert", entry.entry_id)
+    _LOGGER.info("TSUN Inverter %s initialisiert", entry.entry_id)
     return True
 
 

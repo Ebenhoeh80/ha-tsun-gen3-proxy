@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
 ### Added
 
-- HACS-Repository `Ebenhoeh80/ha-tsun-gen3-proxy` mit `hacs.json`, CI und deutscher/englischer Übersetzung
+- HACS-Repository `Ebenhoeh80/ha-tsun-inverter` mit `hacs.json`, CI und deutscher/englischer Übersetzung
 - `DataUpdateCoordinator` mit Push-Updates über die Home-Assistant-MQTT-Integration (`tsun/#`)
 - Reine Parserlogik für Topic-Formate, verschachtelte JSON-Payloads und Entitätszuordnung
 - Echte Entitäts-Plattformen: Sensor, Binärsensor, Number, Select und Update; neue Knoten zur Laufzeit
@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Manifest auf HA-zulässige Schlüssel reduziert: `dependencies: [\"mqtt\"]`, `requirements: []`, `iot_class: local_push`
 - Alte Platzhaltermodule (`mqtt_handler.py`, `*_setup.py`, `repair.py`) entfernt
 - Dokumentation und Release-Notizen auf das neue HACS-Repo umgestellt
+- Repo- und Anzeigename auf `ha-tsun-inverter` bzw. „TSUN Inverter" umgestellt (vom früheren Arbeitsnamen `ha-tsun-gen3-proxy`)
 
 ### Fixed
 

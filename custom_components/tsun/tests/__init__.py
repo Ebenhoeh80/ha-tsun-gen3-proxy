@@ -1,1 +1,1 @@
-"""Tests for TSUN-Gen3-Proxy integration."""
+"""Tests for the TSUN Inverter integration."""

@@ -1,4 +1,4 @@
-"""Update-Plattform für die TSUN-Gen3-Proxy-Integration."""
+"""Update-Plattform für die TSUN-Inverter-Integration."""
 
 from __future__ import annotations
 

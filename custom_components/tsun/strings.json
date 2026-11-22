@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "TSUN-Gen3-Proxy verbinden",
-        "description": "Verbindung zum MQTT-Broker des TSUN-Gen3-Proxys einrichten.",
+        "title": "TSUN Inverter verbinden",
+        "description": "Verbindung zum MQTT-Broker der Home-Assistant-Installation einrichten.",
         "data": {
           "title": "Name der Integration",
           "mqtt_host": "MQTT-Host",
@@ -25,7 +25,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "TSUN-Gen3-Proxy-Optionen",
+        "title": "TSUN Inverter-Optionen",
         "description": "Laufzeitoptionen der Integration anpassen.",
         "data": {
           "at_rate_limit": "AT-Befehlsrate (Befehle pro Minute)",

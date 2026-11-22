@@ -50,7 +50,7 @@ def test_format_state_numerisch_und_binaer():
 
 def test_device_info_enthält_identifikator():
     """Geräte müssen über die Knoten-ID zuordenbar sein."""
-    info = device_info("inv 1", "TSUN", "TSUN-Gen3-Proxy")
+    info = device_info("inv 1", "TSUN", "TSUN Gen3")
     assert ("tsun", "inv_1") in info["identifiers"]
     assert info["manufacturer"] == "TSUN"
 

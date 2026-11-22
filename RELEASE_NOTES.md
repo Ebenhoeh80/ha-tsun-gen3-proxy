@@ -1,10 +1,10 @@
-# TSUN-Gen3-Proxy 0.2.0 – Release-Hinweise
+# TSUN Inverter 0.2.0 – Release-Hinweise
 
 ## Release-Informationen
 
 - **Version:** 0.2.0
 - **Datum:** 2026-11-22
-- **Repository:** https://github.com/Ebenhoeh80/ha-tsun-gen3-proxy
+- **Repository:** https://github.com/Ebenhoeh80/ha-tsun-inverter
 - **Voraussetzung:** Home Assistant 2024.11.0 oder neuer, konfigurierte MQTT-Integration
 
 ## Hauptänderungen
@@ -15,12 +15,13 @@ Der Konfigurationsdialog fragt den MQTT-Broker ab und legt eine eindeutige ID fe
 
 ## Installation
 
-1. `https://github.com/Ebenhoeh80/ha-tsun-gen3-proxy` in HACS unter **Integrationen → Benutzerdefinierte Repositories** hinzufügen.
-2. „TSUN-Gen3-Proxy" installieren und Home Assistant neu starten.
+1. `https://github.com/Ebenhoeh80/ha-tsun-inverter` in HACS unter **Integrationen → Benutzerdefinierte Repositories** hinzufügen.
+2. „TSUN Inverter" installieren und Home Assistant neu starten.
 3. **Einstellungen → Geräte & Dienste → Integration hinzufügen** aufrufen und den MQTT-Broker konfigurieren.
 
 ## Hinweise
 
+- Das Repository hieß während der Entwicklung `ha-tsun-gen3-proxy` und wurde vor Veröffentlichung in `ha-tsun-inverter` umbenannt; HACS-Einträge mit der alten URL bitte erneuern.
 - Veröffentlicht der Proxy selbst MQTT-Discovery, können doppelte Entitäten entstehen. Discovery im Proxy deaktivieren oder die automatisch erzeugten MQTT-Entitäten ignorieren.
 - `at_rate_limit` und `acl_mode` senden MQTT-Kommandos, für die der Upstream-Proxy derzeit keine passenden Topics definiert.
 - Ein HA-Live-Test in einer Installation steht noch aus; die automatisierten Prüfungen (ruff, mypy, pytest, HACS) sind grün.

@@ -1,4 +1,4 @@
-"""Konfigurationsablauf für die TSUN-Gen3-Proxy-Integration."""
+"""Konfigurationsablauf für die TSUN-Inverter-Integration."""
 
 from __future__ import annotations
 
