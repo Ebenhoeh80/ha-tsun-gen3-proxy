@@ -34,6 +34,9 @@ def _module(name: str, **attributes) -> types.ModuleType:
 class _Base:
     """Stub-Basisklasse mit Generics-Unterstützung."""
 
+    def __init__(self, *args, **kwargs) -> None:
+        """Stub: Konstruktorargumente verwerfen."""
+
     def __init_subclass__(cls, **kwargs) -> None:
         """Erlaubt Klassenargumente wie ``domain=...``."""
         super().__init_subclass__()

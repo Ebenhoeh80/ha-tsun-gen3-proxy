@@ -6,7 +6,8 @@ from pathlib import Path
 from custom_components.tsun.const import VERSION
 
 _MANIFEST = Path(__file__).resolve().parents[1] / "manifest.json"
-# Schlüssel des hassfest-Schemas für Custom Integrations (ohne `keywords`).
+# Lokale Kopie der erlaubten Manifest-Schlüssel (Stand 2026-11-22, ohne
+# `keywords`). Verbindlich prüft der `hassfest`-Job in `.github/workflows/ci.yml`.
 _ALLOWED_KEYS = {
     "domain",
     "name",
