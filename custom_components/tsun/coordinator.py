@@ -7,6 +7,7 @@ from collections.abc import Callable
 from typing import Any
 
 from homeassistant.components import mqtt
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -21,15 +22,16 @@ DataT = dict[str, dict[str, Any]]
 class TsunCoordinator(DataUpdateCoordinator[DataT]):
     """Hält die neuesten Messwerte aller Knoten des Proxys vor."""
 
-    def __init__(self, hass: HomeAssistant, entry_id: str) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialisiert den Koordinator ohne Polling-Intervall."""
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=DOMAIN,
             update_interval=None,
         )
-        self.entry_id = entry_id
+        self.entry_id = entry.entry_id
         self._unsubscribe: Callable[[], None] | None = None
 
     async def async_setup(self) -> None:

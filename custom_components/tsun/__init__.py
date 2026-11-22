@@ -17,7 +17,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up TSUN-Gen3-Proxy from a config entry."""
     hass.data.setdefault(DOMAIN, {})
 
-    coordinator = TsunCoordinator(hass, entry.entry_id)
+    coordinator = TsunCoordinator(hass, entry)
     await coordinator.async_setup()
     await coordinator.async_config_entry_first_refresh()
 

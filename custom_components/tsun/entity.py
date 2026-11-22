@@ -7,7 +7,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL
 from .coordinator import TsunCoordinator
-from .parser import EntitySpec, unique_id
+from .parser import EntitySpec, sanitize, unique_id
 
 
 class TsunEntity(CoordinatorEntity[TsunCoordinator]):
@@ -29,7 +29,7 @@ class TsunEntity(CoordinatorEntity[TsunCoordinator]):
         self._attr_unique_id = unique_id(entry_id, node_id, spec)
         self._attr_name = spec.name
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, node_id)},
+            identifiers={(DOMAIN, sanitize(node_id))},
             manufacturer=MANUFACTURER,
             model=MODEL,
             name=f"TSUN {node_id}",
