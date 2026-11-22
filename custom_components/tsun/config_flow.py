@@ -4,20 +4,18 @@ from __future__ import annotations
 
 from typing import Any
 
-import voluptuous as vol
+try:  # HA >= 2026.11
+    import probatio as vol
+except ImportError:  # pragma: no cover - HA 2024.11 ... 2026.10
+    # Ältere HA-Versionen erwarten voluptuous-Schemas in `data_entry_flow`.
+    import voluptuous as vol  # type: ignore[no-redef]
+
 from homeassistant import config_entries
 from homeassistant.components.mqtt import async_wait_for_mqtt_client
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 
-from .const import (
-    CONF_AT_RATE_LIMIT,
-    CONF_LATEST_VERSION,
-    DEFAULT_AT_RATE_LIMIT,
-    DEFAULT_VERSION,
-    DOMAIN,
-    NAME,
-)
+from .const import CONF_AT_RATE_LIMIT, DEFAULT_AT_RATE_LIMIT, DOMAIN, NAME
 
 
 class TsunConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
@@ -50,17 +48,19 @@ class TsunConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: config_entries.ConfigEntry):
-        """Liefert den Options-Ablauf."""
-        return TsunOptionsFlow(config_entry)
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> TsunOptionsFlow:
+        """Liefert den Options-Ablauf.
+
+        Der Config Entry wird seit HA 2026.11 vom Flow-Manager bereitgestellt
+        und nicht mehr im Konstruktor übergeben.
+        """
+        return TsunOptionsFlow()
 
 
 class TsunOptionsFlow(config_entries.OptionsFlow):
     """Optionen zur Laufzeit ändern."""
-
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Speichert den Konfigurationseintrag."""
-        self._entry = config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -69,7 +69,7 @@ class TsunOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        current = self._entry.options
+        current = self.config_entry.options
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
@@ -77,11 +77,7 @@ class TsunOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(
                         CONF_AT_RATE_LIMIT,
                         default=current.get(CONF_AT_RATE_LIMIT, DEFAULT_AT_RATE_LIMIT),
-                    ): vol.All(int, vol.Range(min=0, max=100)),
-                    vol.Optional(
-                        CONF_LATEST_VERSION,
-                        default=current.get(CONF_LATEST_VERSION, DEFAULT_VERSION),
-                    ): str,
+                    ): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
                 }
             ),
         )

@@ -1,0 +1,25 @@
+{
+  "entity": {
+    "sensor": {
+      "rated_power": { "default": "mdi:solar-power" },
+      "total_generation_today": { "default": "mdi:solar-power-variant" },
+      "total_generation_total": { "default": "mdi:solar-power" },
+      "sw_exception": { "default": "mdi:counter" },
+      "at_command_blocked": { "default": "mdi:alert" },
+      "mqtt_published": { "default": "mdi:mqtt" },
+      "mqtt_received": { "default": "mdi:mqtt" }
+    },
+    "binary_sensor": {
+      "online": { "default": "mdi:check-network" }
+    },
+    "number": {
+      "at_rate_limit": { "default": "mdi:speedometer" }
+    },
+    "select": {
+      "acl_mode": { "default": "mdi:shield-key" }
+    },
+    "update": {
+      "update": { "default": "mdi:update" }
+    }
+  }
+}

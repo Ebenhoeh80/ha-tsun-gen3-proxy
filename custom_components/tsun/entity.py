@@ -27,15 +27,28 @@ class TsunEntity(CoordinatorEntity[TsunCoordinator]):
         self.node_id = node_id
         self.spec = spec
         self._attr_unique_id = unique_id(entry_id, node_id, spec)
-        self._attr_name = spec.name
-        self._attr_device_info = DeviceInfo(
+        # Name und Icon kommen aus strings.json/translations und icons.json.
+        # Die Unique-ID bleibt unverändert, daher gibt es keine
+        # Registry-Migration (A-16, A-32).
+        self._attr_translation_key = spec.suffix
+        device_info = DeviceInfo(
             identifiers={(DOMAIN, sanitize(node_id))},
             manufacturer=MANUFACTURER,
             model=MODEL,
             name=f"TSUN {node_id}",
         )
+        # Im Standard-Setup ist die Knoten-ID die Seriennummer des Wechsel-
+        # richters. Nur rein numerische IDs werden daher als Seriennummer
+        # übernommen; Platzhalter wie `inv_1` bleiben unangetastet (A-15).
+        if node_id.isdigit():
+            device_info["serial_number"] = node_id
+        self._attr_device_info = device_info
 
     @property
     def available(self) -> bool:
-        """Die Entität ist verfügbar, sobald der Knoten Daten liefert."""
-        return bool(self.coordinator.data and self.node_id in self.coordinator.data)
+        """Verfügbar nur bei erfolgreichem Coordinator und frischem Knoten.
+
+        Ohne Last-Seen-Prüfung bleiben Entitäten nach einem Proxy-/Broker-
+        Ausfall dauerhaft ``available`` und zeigen veraltete Werte (A-21).
+        """
+        return super().available and not self.coordinator.is_stale(self.node_id)

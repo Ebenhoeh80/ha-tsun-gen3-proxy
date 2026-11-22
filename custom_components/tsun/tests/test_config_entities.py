@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, patch
 from custom_components.tsun.number import TsunNumber
 from custom_components.tsun.parser import ENTITY_SPECS
 from custom_components.tsun.select import TsunSelect
+from custom_components.tsun.tests.helpers import make_coordinator
 
 
 def _spec(suffix: str):
@@ -23,11 +24,14 @@ def _spec(suffix: str):
 
 def test_number_wert_wird_wiederhergestellt() -> None:
     """Ein gespeicherter AT-Wert im gültigen Bereich wird übernommen."""
-    coordinator: Any = object()
+    coordinator: Any = make_coordinator()
     entity = TsunNumber(coordinator, "entry1", "inv1", _spec("at_rate_limit"), 0.0)
     last = SimpleNamespace(native_value=42.0)
-    with patch.object(
-        entity, "async_get_last_number_data", new=AsyncMock(return_value=last)
+    with (
+        patch.object(
+            entity, "async_get_last_number_data", new=AsyncMock(return_value=last)
+        ),
+        patch.object(entity, "async_write_ha_state"),
     ):
         asyncio.run(entity.async_added_to_hass())
     assert entity.native_value == 42.0
@@ -35,11 +39,14 @@ def test_number_wert_wird_wiederhergestellt() -> None:
 
 def test_number_ungueltiger_wert_wird_verworfen() -> None:
     """Ein Wert außerhalb erlaubter Grenzen bleibt unberücksichtigt."""
-    coordinator: Any = object()
+    coordinator: Any = make_coordinator()
     entity = TsunNumber(coordinator, "entry1", "inv1", _spec("at_rate_limit"), 5.0)
     last = SimpleNamespace(native_value=999.0)
-    with patch.object(
-        entity, "async_get_last_number_data", new=AsyncMock(return_value=last)
+    with (
+        patch.object(
+            entity, "async_get_last_number_data", new=AsyncMock(return_value=last)
+        ),
+        patch.object(entity, "async_write_ha_state"),
     ):
         asyncio.run(entity.async_added_to_hass())
     assert entity.native_value == 5.0
@@ -47,11 +54,12 @@ def test_number_ungueltiger_wert_wird_verworfen() -> None:
 
 def test_select_auswahl_wird_wiederhergestellt() -> None:
     """Eine gespeicherte, gültige Auswahl wird übernommen."""
-    coordinator: Any = object()
+    coordinator: Any = make_coordinator()
     entity = TsunSelect(coordinator, "entry1", "inv1", _spec("acl_mode"), "standard")
     last = SimpleNamespace(state="strict")
-    with patch.object(
-        entity, "async_get_last_state", new=AsyncMock(return_value=last)
+    with (
+        patch.object(entity, "async_get_last_state", new=AsyncMock(return_value=last)),
+        patch.object(entity, "async_write_ha_state"),
     ):
         asyncio.run(entity.async_added_to_hass())
     assert entity.current_option == "strict"
@@ -59,11 +67,12 @@ def test_select_auswahl_wird_wiederhergestellt() -> None:
 
 def test_select_unbekannte_auswahl_wird_verworfen() -> None:
     """Ein nicht mehr angebotener Wert fällt auf den Standard zurück."""
-    coordinator: Any = object()
+    coordinator: Any = make_coordinator()
     entity = TsunSelect(coordinator, "entry1", "inv1", _spec("acl_mode"), "standard")
     last = SimpleNamespace(state="veraltet")
-    with patch.object(
-        entity, "async_get_last_state", new=AsyncMock(return_value=last)
+    with (
+        patch.object(entity, "async_get_last_state", new=AsyncMock(return_value=last)),
+        patch.object(entity, "async_write_ha_state"),
     ):
         asyncio.run(entity.async_added_to_hass())
     assert entity.current_option == "standard"

@@ -3,28 +3,27 @@
 from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from .const import CONF_NODE_ID, DOMAIN, PROXY_NODE
+from . import TsunConfigEntry
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
+from .parser import ENTITY_SPECS, EntitySpec
 
-_PLATFORM = "select"
+_PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: TsunConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Erzeugt Auswahl-Entitäten für alle erkannten Knoten."""
-    coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
-    specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
+    coordinator: TsunCoordinator = entry.runtime_data
+    specs = [spec for spec in ENTITY_SPECS if spec.platform == "select"]
     known: set[str] = set()
 
     def _initial(spec: EntitySpec) -> str:
@@ -32,10 +31,7 @@ async def async_setup_entry(
         return str(entry.options.get(spec.suffix, fallback))
 
     def _add_new() -> None:
-        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID)) - {
-            PROXY_NODE
-        }
-        new_nodes = nodes - known
+        new_nodes = coordinator.new_nodes(known, exclude_proxy=True)
         if not new_nodes:
             return
         known.update(new_nodes)
@@ -54,7 +50,7 @@ async def async_setup_entry(
 class TsunSelect(TsunEntity, SelectEntity, RestoreEntity):
     """Auswahlwert, der per MQTT an den Proxy gesendet wird.
 
-    Als ``RestoreSelect`` bleibt die getroffene Auswahl auch nach einem
+    Als ``RestoreEntity`` bleibt die getroffene Auswahl auch nach einem
     HA-Neustart erhalten und muss nicht erneut gesetzt werden.
     """
 
@@ -71,8 +67,6 @@ class TsunSelect(TsunEntity, SelectEntity, RestoreEntity):
         self._value = initial
         self._attr_entity_category = EntityCategory.CONFIG
         self._attr_options = list(spec.options)
-        if spec.icon:
-            self._attr_icon = spec.icon
 
     async def async_added_to_hass(self) -> None:
         """Stellt die zuletzt gültige Auswahl nach einem Neustart wieder her."""
@@ -90,8 +84,10 @@ class TsunSelect(TsunEntity, SelectEntity, RestoreEntity):
         """Sendet die neue Auswahl an den Proxy."""
         if self.spec.command is None:
             return
-        await self.coordinator.async_send_command(
+        sent = await self.coordinator.async_send_command(
             self.node_id, self.spec.command, option
         )
+        if not sent:
+            return
         self._value = option
         self.async_write_ha_state()

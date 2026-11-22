@@ -2,25 +2,50 @@
   "config": {
     "step": {
       "user": {
-        "title": "TSUN Inverter einrichten",
-        "description": "Die Integration nutzt die bereits eingerichtete MQTT-Integration von Home Assistant. Es sind keine Broker-Zugangsdaten nötig; Wechselrichter erscheinen automatisch, sobald TSUN Inverter Messwerte empfängt."
+        "title": "Set up TSUN Inverter",
+        "description": "The integration uses the MQTT integration already configured in Home Assistant. No broker credentials are needed; inverters appear automatically once TSUN Inverter receives data."
       }
     },
     "abort": {
-      "already_configured": "TSUN Inverter ist bereits eingerichtet.",
-      "mqtt_unavailable": "Die MQTT-Integration ist nicht verfügbar. Bitte zuerst in Home Assistant einrichten und erneut versuchen."
+      "already_configured": "TSUN Inverter is already set up.",
+      "mqtt_unavailable": "The MQTT integration is not available. Set it up in Home Assistant first, then try again."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "TSUN Inverter-Optionen",
-        "description": "Laufzeitoptionen der Integration anpassen.",
+        "title": "TSUN Inverter options",
+        "description": "Adjust runtime options of the integration.",
         "data": {
-          "at_rate_limit": "AT-Befehlsrate (Befehle pro Minute)",
-          "latest_version": "Bekannte neueste Version"
+          "at_rate_limit": "AT command rate (commands per minute)"
+        },
+        "data_description": {
+          "at_rate_limit": "Limits how many AT commands the proxy forwards per minute. 0 means unlimited."
         }
       }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "rated_power": { "name": "Rated power" },
+      "total_generation_today": { "name": "Daily generation" },
+      "total_generation_total": { "name": "Total generation" },
+      "sw_exception": { "name": "Software error" },
+      "at_command_blocked": { "name": "Blocked AT commands" },
+      "mqtt_published": { "name": "MQTT messages published" },
+      "mqtt_received": { "name": "MQTT messages received" }
+    },
+    "binary_sensor": {
+      "online": { "name": "Online" }
+    },
+    "number": {
+      "at_rate_limit": { "name": "AT command rate" }
+    },
+    "select": {
+      "acl_mode": { "name": "AT access mode" }
+    },
+    "update": {
+      "update": { "name": "Integration update" }
     }
   }
 }

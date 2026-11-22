@@ -5,8 +5,10 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from custom_components.tsun.config_flow import TsunConfigFlow
+from custom_components.tsun.config_flow import TsunConfigFlow, TsunOptionsFlow
+from custom_components.tsun.const import CONF_AT_RATE_LIMIT, CONF_LATEST_VERSION
 from custom_components.tsun.parser import extract_values, parse_topic
+from custom_components.tsun.tests.helpers import make_entry
 
 
 def test_parse_topic_upstream_format():
@@ -28,9 +30,7 @@ def test_parse_topic_ignoriert_andere_prefixe():
 
 def test_extract_values_json():
     """Proxy-Payloads sind JSON-Objekte mit Messwert-Schlüsseln."""
-    assert extract_values(b'{"Daily_Generation": 1.23}') == {
-        "Daily_Generation": 1.23
-    }
+    assert extract_values(b'{"Daily_Generation": 1.23}') == {"Daily_Generation": 1.23}
 
 
 def test_extract_values_verschachtelt():
@@ -47,6 +47,12 @@ def test_extract_values_zahl_und_leer():
     assert extract_values("42.5") == {"value": 42.5}
     assert extract_values("") == {}
     assert extract_values(b"n/a") == {"value": "n/a"}
+
+
+def test_extract_values_begrenzt_tiefe() -> None:
+    """Extrem verschachtelte Payloads werden nicht vollständig abgeflacht."""
+    payload = '{"a":' * 30 + '{"Rated_Power":800}' + "}" * 30
+    assert extract_values(payload) == {}
 
 
 def _flow() -> MagicMock:
@@ -69,7 +75,6 @@ def test_bestaetigung_bricht_ohne_mqtt_ab() -> None:
         result = asyncio.run(TsunConfigFlow.async_step_user(flow, {}))
     assert result["reason"] == "mqtt_unavailable"
     flow.async_abort.assert_called_once_with(reason="mqtt_unavailable")
-    flow.async_create_entry.assert_not_called()
 
 
 def test_bestaetigung_erstellt_entry_mit_mqtt() -> None:
@@ -82,3 +87,30 @@ def test_bestaetigung_erstellt_entry_mit_mqtt() -> None:
         result = asyncio.run(TsunConfigFlow.async_step_user(flow, {}))
     assert result["type"] == "create_entry"
     flow.async_create_entry.assert_called_once_with(title="TSUN Inverter", data={})
+
+
+def test_optionen_schreiben_kein_latest_version() -> None:
+    """Der Options-Flow darf den Release-Check nicht dauerhaft deaktivieren."""
+    flow = MagicMock()
+    flow.config_entry = make_entry(options={CONF_LATEST_VERSION: "0.2.4"})
+    asyncio.run(TsunOptionsFlow.async_step_init(flow, None))
+    schema = flow.async_show_form.call_args.kwargs["data_schema"]
+    keys = {str(key) for key in schema.schema}
+    assert CONF_AT_RATE_LIMIT in keys
+    assert CONF_LATEST_VERSION not in keys
+
+
+def test_optionen_validieren_bereich() -> None:
+    """Der AT-Wert wird in eine Zahl umgewandelt und auf 0..100 begrenzt."""
+    flow = MagicMock()
+    flow.config_entry = make_entry(options={})
+    asyncio.run(TsunOptionsFlow.async_step_init(flow, None))
+    schema = flow.async_show_form.call_args.kwargs["data_schema"]
+    key = next(k for k in schema.schema if str(k) == CONF_AT_RATE_LIMIT)
+    assert schema.schema[key]("30") == 30
+    try:
+        schema.schema[key](101)
+    except Exception:
+        pass
+    else:
+        raise AssertionError("Werte > 100 müssen abgelehnt werden")

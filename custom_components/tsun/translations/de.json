@@ -17,10 +17,35 @@
         "title": "TSUN Inverter-Optionen",
         "description": "Laufzeitoptionen der Integration anpassen.",
         "data": {
-          "at_rate_limit": "AT-Befehlsrate (Befehle pro Minute)",
-          "latest_version": "Bekannte neueste Version"
+          "at_rate_limit": "AT-Befehlsrate (Befehle pro Minute)"
+        },
+        "data_description": {
+          "at_rate_limit": "Begrenzt die Anzahl der AT-Befehle, die der Proxy pro Minute weiterleitet. 0 bedeutet unbegrenzt."
         }
       }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "rated_power": { "name": "Nennleistung" },
+      "total_generation_today": { "name": "Tageserzeugung" },
+      "total_generation_total": { "name": "Gesamterzeugung" },
+      "sw_exception": { "name": "Softwarefehler" },
+      "at_command_blocked": { "name": "Blockierte AT-Befehle" },
+      "mqtt_published": { "name": "MQTT-Nachrichten gesendet" },
+      "mqtt_received": { "name": "MQTT-Nachrichten empfangen" }
+    },
+    "binary_sensor": {
+      "online": { "name": "Online" }
+    },
+    "number": {
+      "at_rate_limit": { "name": "AT-Befehlsrate" }
+    },
+    "select": {
+      "acl_mode": { "name": "AT-Zugriffsmodus" }
+    },
+    "update": {
+      "update": { "name": "Integrationsupdate" }
     }
   }
 }

@@ -1,0 +1,15 @@
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+# pytest-homeassistant nutzt asynchrone Autouse-Fixtures (u. a.
+# `configure_event_loop`). Ohne Auto-Mode lehnt pytest-asyncio diese ab.
+asyncio_mode = "auto"

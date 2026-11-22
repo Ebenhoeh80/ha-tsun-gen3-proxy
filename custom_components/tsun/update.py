@@ -1,8 +1,8 @@
 """Update-Plattform für die TSUN-Inverter-Integration.
 
-Die neueste Version wird nicht mehr statisch aus den Optionen gelesen, sondern
-über die GitHub-Releases-API ermittelt (HA-Best-Practice für Update-Entitäten).
-Ein manuell gesetzter Wert bleibt als Offline-Fallback erhalten.
+Die neueste Version wird über die GitHub-Releases-API ermittelt (HA-Best-
+Practice für Update-Entitäten). Ein veralteter, manuell gesetzter Wert aus
+einem Config Entry der Version 0.2.x bleibt als Offline-Fallback erhalten.
 """
 
 from __future__ import annotations
@@ -12,26 +12,19 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 import aiohttp
-from homeassistant.components.update import UpdateEntity
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.update import UpdateDeviceClass, UpdateEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_time_interval
 
-from .const import (
-    CONF_LATEST_VERSION,
-    CONF_NODE_ID,
-    DEFAULT_VERSION,
-    DOMAIN,
-    PROXY_NODE,
-    VERSION,
-)
+from . import TsunConfigEntry
+from .const import CONF_LATEST_VERSION, DEFAULT_VERSION, PROXY_NODE, VERSION
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
 from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes, sanitize
 
-_PLATFORM = "update"
+_PARALLEL_UPDATES = 0
 _REPO = "Ebenhoeh80/ha-tsun-inverter"
 _RELEASES_URL = f"https://api.github.com/repos/{_REPO}/releases/latest"
 _RELEASE_PAGE = f"https://github.com/{_REPO}/releases"
@@ -57,13 +50,13 @@ async def async_fetch_release(hass: HomeAssistant) -> ReleaseInfo | None:
     bleibt die zuletzt bekannte Version stehen.
     """
     session = async_get_clientsession(hass)
-    if session is None:  # nur in der reinen Logik-Testumgebung
+    if session is None:  # defensiv: ohne Session bleibt die Version stehen
         return None
     try:
         async with session.get(_RELEASES_URL, timeout=_REQUEST_TIMEOUT) as response:
             response.raise_for_status()
             payload = await response.json()
-    except (aiohttp.ClientError, TimeoutError, ValueError):
+    except aiohttp.ClientError, TimeoutError, ValueError:
         return None
 
     if not isinstance(payload, dict):
@@ -81,16 +74,16 @@ async def async_fetch_release(hass: HomeAssistant) -> ReleaseInfo | None:
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: TsunConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Erzeugt eine Update-Entität, sobald ein Wechselrichter bekannt ist."""
-    coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
-    specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
+    coordinator: TsunCoordinator = entry.runtime_data
+    specs = [spec for spec in ENTITY_SPECS if spec.platform == "update"]
     if not specs:
         return
 
-    configured = entry.data.get(CONF_NODE_ID)
+    configured = coordinator.configured_node
     known_node: str | None = None
 
     def _add_new() -> None:
@@ -103,11 +96,10 @@ async def async_setup_entry(
         if not nodes:
             return
         known_node = configured if configured in nodes else min(nodes)
-        manual = str(
-            entry.data.get(CONF_LATEST_VERSION)
-            or entry.options.get(CONF_LATEST_VERSION)
-            or ""
-        )
+        # A-02: der Options-Flow schreibt `latest_version` nicht mehr. Nur
+        # noch ein Wert aus einem alten Config Entry wird als Fallback
+        # berücksichtigt; danach ist die GitHub-Abfrage wieder aktiv.
+        manual = str(entry.data.get(CONF_LATEST_VERSION) or "")
         async_add_entities(
             [TsunUpdate(coordinator, entry.entry_id, known_node, specs[0], manual)]
         )
@@ -133,12 +125,23 @@ class TsunUpdate(TsunEntity, UpdateEntity):
         # Ohne den Knoten in der Unique-ID bleibt die Entität beim Neustart
         # stabil, auch wenn ein anderer Knoten zuerst Daten liefert.
         self._attr_unique_id = f"{sanitize(entry_id)}_{spec.suffix}"
+        self._attr_device_class = UpdateDeviceClass.FIRMWARE
         self._manual_version = manual_version
         self._attr_installed_version = VERSION
         self._attr_latest_version = manual_version or DEFAULT_VERSION
         self._attr_release_url = _RELEASE_PAGE
         self._attr_release_summary = _FALLBACK_SUMMARY
         self._cancel_refresh: Callable[[], None] | None = None
+
+    @property
+    def available(self) -> bool:
+        """Die Integrationsversion gilt unabhängig vom Zustand eines Knotens.
+
+        Die Entität wird aus Stabilitätsgründen einem Gerät zugeordnet, darf
+        aber nicht `unavailable` werden, wenn genau dieser Knoten verschwindet
+        (A-22).
+        """
+        return self.coordinator.last_update_success
 
     async def async_added_to_hass(self) -> None:
         """Lädt die Release-Info und plant die nächste Abfrage ein."""

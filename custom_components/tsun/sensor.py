@@ -7,32 +7,30 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_NODE_ID, DOMAIN
+from . import TsunConfigEntry
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes, specs_for_node
+from .parser import ENTITY_SPECS, EntitySpec, specs_for_node
 
-_PLATFORM = "sensor"
+_PARALLEL_UPDATES = 0
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: TsunConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Erzeugt Sensoren für alle bekannten Knoten."""
-    coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
-    specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
+    coordinator: TsunCoordinator = entry.runtime_data
+    specs = [spec for spec in ENTITY_SPECS if spec.platform == "sensor"]
     known: set[str] = set()
 
     def _add_new() -> None:
-        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID))
-        new_nodes = nodes - known
+        new_nodes = coordinator.new_nodes(known)
         if not new_nodes:
             return
         known.update(new_nodes)
@@ -68,12 +66,8 @@ class TsunSensor(TsunEntity, SensorEntity):
             self._attr_state_class = SensorStateClass(spec.state_class)
         if spec.entity_category:
             self._attr_entity_category = EntityCategory(spec.entity_category)
-        if spec.icon:
-            self._attr_icon = spec.icon
 
     @property
-    def native_value(self) -> str | None:
-        """Liefert den neuesten Messwert."""
-        return (self.coordinator.data or {}).get(self.node_id, {}).get(
-            self.spec.suffix
-        )
+    def native_value(self) -> str | int | float | None:
+        """Liefert den neuesten Messwert als nativen Typ."""
+        return (self.coordinator.data or {}).get(self.node_id, {}).get(self.spec.suffix)

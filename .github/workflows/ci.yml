@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,35 +20,57 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          # homeassistant==2026.11.2 verlangt Python >=3.14.2.
+          python-version: "3.14"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest ruff mypy homeassistant voluptuous
+          python -m pip install \
+            coverage==7.17.4 \
+            pytest==9.0.3 \
+            pytest-asyncio==1.4.0 \
+            ruff==0.17.6 \
+            mypy==2.4.1 \
+            homeassistant==2026.11.2 \
+            pytest-homeassistant==2026.11.2 \
+            probatio==0.13.0 \
+            voluptuous==0.16.0
 
       - name: Run Ruff (Linting)
         run: ruff check custom_components/tsun
 
+      - name: Run Ruff (Format)
+        run: ruff format --check custom_components/tsun
+
       - name: Run MyPy (Type Checking)
         run: mypy custom_components/tsun --ignore-missing-imports --explicit-package-bases
 
-      - name: Run Pytest
-        run: pytest custom_components/tsun/tests -q --tb=short
+      # `coverage run` mit Dateipfad statt Paketnamen: `--source=custom_components.tsun`
+      # importiert das Paket vor Messbeginn und liefert falsche 0 %-Werte.
+      - name: Run Pytest with coverage
+        run: |
+          coverage run --source=custom_components/tsun --omit=*/tests/* \
+            -m pytest custom_components/tsun/tests -q --tb=short
+          coverage report -m
 
   hacs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: HACS validation
-        uses: hacs/action@main
+        # Gepinnt auf hacs/action@main (Stand 22.11.2026): offiziell empfohlener Ref; ein v2-Tag existiert nicht.
+        uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
         with:
           category: integration
 
   hassfest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@master
+        # Gepinnt auf home-assistant/actions/hassfest@2026.11.0 (Stand 22.11.2026): offiziell dokumentiert ist @master, ein v1-Tag existiert nicht.
+        uses: home-assistant/actions/hassfest@07f46fd2e19967768b5fd3000f91f857452b767c # 2026.11.0

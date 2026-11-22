@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
 ## [Unreleased]
 
+## 0.3.0 - 2026-11-22
+
+### Changed
+
+- Options-Default `latest_version` entfernt; die Update-Abfrage funktioniert jetzt ohne statischen Fallback-Wert und liefert den aktuellen Release-Stand.
+- Alle Plattformen mit `PARALLEL_UPDATES` versehen und Laufzeitdaten über `entry.runtime_data` statt `hass.data` bereitgestellt.
+- Device-Remove-Hook ergänzt, damit entfernte Geräte auch aus der Registrierung verschwinden.
+- Numerische Sensoren liefern echte Zahlen statt formatierter Strings; Leistungswerte nutzen die Device-Class `power`, die Update-Entität `firmware`.
+- Icons und Entity-Namen kommen aus den Translation-Dateien (`strings.json`, `translations/de.json`, `translations/en.json`).
+- Diagnostics enthalten `last_seen` je Knoten und redigieren sensible Werte weiterhin zuverlässig.
+- Availability wird pro Knoten berechnet; eine Knoten-Obergrenze und ein Payload-Tiefenlimit begrenzen Speicher und Registry-Wachstum.
+- Tests importieren echte Home-Assistant-Klassen mit `pytest-homeassistant`; globale Fake-Module in `sys.modules` wurden entfernt. 61 Tests, Ruff, Ruff-Format, MyPy und Coverage (76 %) lokal grün.
+- CI: Root-`pyproject.toml` für Ruff (`line-length = 88`, `select = ["E", "F", "W", "I", "B", "UP"]`), zusätzlicher `ruff format --check`, exakt gepinnte Python-Pakete, gepinnte HACS-/Hassfest-Refs, `permissions: contents: read` und Timeouts für HACS/Hassfest.
+
+### Documentation
+
+- Widersprüchliche Altaussagen (nicht existierende Klasse, nicht verifizierte CI-/Prüfstandsangaben und veraltete Versions-/Fixture-Hinweise) wurden mit Datum und Grund durchgestrichen statt gelöscht.
+- Verifikationsstatus: Die CI-Gates sind definiert; lokale Prüfungen sind grün. Ein bestätigter grüner CI-Lauf für den Release-Commit stand zum Zeitpunkt dieser Notiz noch aus und wird nach dem Push geprüft. Die Manifest-Version ist 0.3.0.
+
 ## [0.2.4] - 2026-11-22
 
 ### Added
@@ -15,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
 ### Changed
 
-- `at_rate_limit` nutzt jetzt `RestoreNumber`; `acl_mode` kombiniert `SelectEntity` und `RestoreEntity`. Gesetzte Werte überstehen einen HA-Neustart und werden auf gültige Wertebereiche geprüft. (Korrigiert 22.11.2026: die erste Fassung dieser Notiz nannte `RestoreSelect`; diese Klasse existiert in Home Assistant nicht.)
+- `at_rate_limit` nutzt jetzt `RestoreNumber`; `acl_mode` kombiniert `SelectEntity` und `RestoreEntity`. Gesetzte Werte überstehen einen HA-Neustart und werden auf gültige Wertebereiche geprüft. ~~Die erste Fassung dieser Notiz nannte `RestoreSelect`.~~ (korrigiert 22.11.2026: `RestoreSelect` existiert in Home Assistant nicht; maßgeblich sind `RestoreNumber` sowie `SelectEntity` + `RestoreEntity`.)
 - MQTT-Steuer-Kommandos werden mit `retain=False` veröffentlicht, damit veraltete Befehle nicht nach einem Proxy-Neustart erneut angewendet werden.
 
 ### Fixed

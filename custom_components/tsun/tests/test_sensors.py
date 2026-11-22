@@ -51,7 +51,10 @@ def test_format_state_numerisch_und_binaer():
     online = spec_for_key("online")
     assert power is not None
     assert online is not None
-    assert format_state(800.0, power) == "800"
+    assert format_state(800.0, power) == 800.0
+    assert format_state("7.5", power) == 7.5
+    assert format_state("800", power) == 800
+    assert isinstance(format_state("7.5", power), float)
     assert format_state(True, online) == "on"
     assert format_state("offline", online) == "off"
     assert format_state(None, power) is None
@@ -69,3 +72,29 @@ def test_plattformen_sind_vollständig():
     """Alle für HACS relevanten Plattformen müssen Specs haben."""
     platforms = {spec.platform for spec in ENTITY_SPECS}
     assert {"sensor", "binary_sensor", "number", "select", "update"} <= platforms
+
+
+def test_rated_power_hat_device_class():
+    """Nennleistung ist als Leistung semantisch korrekt klassifiziert."""
+    power = spec_for_key("Rated_Power")
+    assert power is not None
+    assert power.device_class == "power"
+
+
+def test_uebersetzungen_und_icons_sind_vollständig() -> None:
+    """Jede Entität braucht einen Namen und ein Icon in den JSON-Dateien."""
+    import json
+    from pathlib import Path
+
+    base = Path(__file__).resolve().parents[1]
+    strings = json.loads((base / "strings.json").read_text(encoding="utf-8"))
+    icons = json.loads((base / "icons.json").read_text(encoding="utf-8"))
+    for spec in ENTITY_SPECS:
+        assert spec.suffix in strings["entity"][spec.platform], spec.suffix
+        assert spec.suffix in icons["entity"][spec.platform], spec.suffix
+    for language in ("en", "de"):
+        data = json.loads(
+            (base / "translations" / f"{language}.json").read_text(encoding="utf-8")
+        )
+        for spec in ENTITY_SPECS:
+            assert spec.suffix in data["entity"][spec.platform], spec.suffix

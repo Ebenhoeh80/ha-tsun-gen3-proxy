@@ -3,40 +3,39 @@
 from __future__ import annotations
 
 from homeassistant.components.number import NumberMode, RestoreNumber
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_NODE_ID, DEFAULT_AT_RATE_LIMIT, DOMAIN, PROXY_NODE
+from . import TsunConfigEntry
+from .const import DEFAULT_AT_RATE_LIMIT
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
+from .parser import ENTITY_SPECS, EntitySpec
 
-_PLATFORM = "number"
+_PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: TsunConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Erzeugt konfigurierbare Zahlen-Entitäten für alle erkannten Knoten."""
-    coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
-    specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
+    coordinator: TsunCoordinator = entry.runtime_data
+    specs = [spec for spec in ENTITY_SPECS if spec.platform == "number"]
     known: set[str] = set()
 
     def _initial(spec: EntitySpec) -> float:
         fallback = (
-            DEFAULT_AT_RATE_LIMIT if spec.suffix == "at_rate_limit" else spec.min_value or 0
+            DEFAULT_AT_RATE_LIMIT
+            if spec.suffix == "at_rate_limit"
+            else spec.min_value or 0
         )
         return float(entry.options.get(spec.suffix, fallback))
 
     def _add_new() -> None:
-        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID)) - {
-            PROXY_NODE
-        }
-        new_nodes = nodes - known
+        new_nodes = coordinator.new_nodes(known, exclude_proxy=True)
         if not new_nodes:
             return
         known.update(new_nodes)
@@ -79,8 +78,6 @@ class TsunNumber(TsunEntity, RestoreNumber):
             self._attr_native_min_value = spec.min_value
         if spec.max_value is not None:
             self._attr_native_max_value = spec.max_value
-        if spec.icon:
-            self._attr_icon = spec.icon
 
     async def async_added_to_hass(self) -> None:
         """Stellt den zuletzt gesetzten Wert nach einem Neustart wieder her."""
@@ -101,8 +98,10 @@ class TsunNumber(TsunEntity, RestoreNumber):
         """Sendet einen neuen Wert an den Proxy."""
         if self.spec.command is None:
             return
-        await self.coordinator.async_send_command(
+        sent = await self.coordinator.async_send_command(
             self.node_id, self.spec.command, f"{value:g}"
         )
+        if not sent:
+            return
         self._value = value
         self.async_write_ha_state()

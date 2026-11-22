@@ -8,6 +8,7 @@ ohne HA-Laufzeit testen.
 from __future__ import annotations
 
 import json
+import logging
 import re
 from dataclasses import dataclass
 from typing import Any
@@ -16,8 +17,14 @@ from .const import (
     COMMAND_ACL_MODE,
     COMMAND_AT_RATE_LIMIT,
     DEFAULT_NODE_ID,
+    DEVICE_CLASS_CONNECTIVITY,
+    DEVICE_CLASS_ENERGY,
+    DEVICE_CLASS_POWER,
     ENTITY_CATEGORY_CONFIG,
     ENTITY_CATEGORY_DIAGNOSTIC,
+    LOGGER,
+    MAX_NODES,
+    MAX_PAYLOAD_DEPTH,
     NUMBER_AT_RATE_LIMIT,
     PROXY_NODE,
     SELECT_ACL_MODE,
@@ -29,6 +36,8 @@ from .const import (
     UNIT_RATE,
     UNIT_WATT,
 )
+
+_LOGGER = logging.getLogger(LOGGER)
 
 
 @dataclass(frozen=True)
@@ -60,8 +69,8 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         "rated_power",
         "Nennleistung",
         unit=UNIT_WATT,
+        device_class=DEVICE_CLASS_POWER,
         state_class=STATE_CLASS_MEASUREMENT,
-        icon="mdi:solar-power",
         groups=("inverter",),
     ),
     EntitySpec(
@@ -70,9 +79,8 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         "total_generation_today",
         "Tageserzeugung",
         unit=UNIT_KILO_WATT_HOUR,
-        device_class="energy",
+        device_class=DEVICE_CLASS_ENERGY,
         state_class=STATE_CLASS_TOTAL_INCREASING,
-        icon="mdi:solar-power-variant",
         groups=("total",),
     ),
     EntitySpec(
@@ -81,9 +89,8 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         "total_generation_total",
         "Gesamterzeugung",
         unit=UNIT_KILO_WATT_HOUR,
-        device_class="energy",
+        device_class=DEVICE_CLASS_ENERGY,
         state_class=STATE_CLASS_TOTAL_INCREASING,
-        icon="mdi:solar-power",
         groups=("total",),
     ),
     EntitySpec(
@@ -94,7 +101,6 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         unit=UNIT_COUNT,
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon="mdi:counter",
         groups=("proxy",),
     ),
     EntitySpec(
@@ -105,7 +111,6 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         unit=UNIT_COUNT,
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon="mdi:alert",
         groups=("proxy",),
     ),
     EntitySpec(
@@ -116,7 +121,6 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         unit=UNIT_COUNT,
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon="mdi:mqtt",
     ),
     EntitySpec(
         ("mqtt_received",),
@@ -126,14 +130,13 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         unit=UNIT_COUNT,
         state_class=STATE_CLASS_MEASUREMENT,
         entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-        icon="mdi:mqtt",
     ),
     EntitySpec(
         ("online",),
         "binary_sensor",
         "online",
         "Online",
-        device_class="connectivity",
+        device_class=DEVICE_CLASS_CONNECTIVITY,
     ),
     EntitySpec(
         (),
@@ -160,7 +163,6 @@ ENTITY_SPECS: tuple[EntitySpec, ...] = (
         "update",
         "update",
         "Update",
-        icon="mdi:update",
     ),
 )
 
@@ -188,13 +190,17 @@ def parse_topic(topic: str, prefix: str = TOPIC_PREFIX) -> tuple[str, str] | Non
     return parts[1], "/".join(parts[2:])
 
 
-def _flatten(value: Any, target: dict[str, Any]) -> None:
-    """Legt verschachtelte JSON-Objekte flach auf oberste Schlüssel."""
-    if not isinstance(value, dict):
+def _flatten(value: Any, target: dict[str, Any], depth: int = 0) -> None:
+    """Legt verschachtelte JSON-Objekte flach auf oberste Schlüssel.
+
+    Die Tiefe ist begrenzt: eine fremde, extrem verschachtelte Payload auf
+    `tsun/#` darf die CPU nicht binden (A-34).
+    """
+    if not isinstance(value, dict) or depth >= MAX_PAYLOAD_DEPTH:
         return
     for key, item in value.items():
         if isinstance(item, dict):
-            _flatten(item, target)
+            _flatten(item, target, depth + 1)
         else:
             target[str(key)] = item
 
@@ -218,7 +224,7 @@ def extract_values(payload: bytes | bytearray | str) -> dict[str, Any]:
 
     try:
         decoded = json.loads(text)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return {"value": text}
 
     if isinstance(decoded, dict):
@@ -254,9 +260,29 @@ def discovered_nodes(
     ignoriert, damit kein Platzhaltergerät entsteht.
     """
     nodes = {str(node) for node in (data or {}) if node}
-    if configured_node and configured_node != DEFAULT_NODE_ID:
-        nodes.add(configured_node)
-    return nodes
+    configured = (
+        configured_node
+        if configured_node and configured_node != DEFAULT_NODE_ID
+        else None
+    )
+    if configured:
+        nodes.add(configured)
+    if len(nodes) <= MAX_NODES:
+        return nodes
+
+    # Der konfigurierte Knoten hat Vorrang; danach alphabetisch, damit das
+    # Ergebnis deterministisch bleibt. Bestehende Knoten werden nie entfernt,
+    # sondern nur die Erzeugung weiterer Entitäten begrenzt (A-33).
+    ordered = sorted(nodes)
+    if configured and configured in nodes:
+        others = [node for node in ordered if node != configured][: MAX_NODES - 1]
+        return {configured, *others}
+    _LOGGER.warning(
+        "Mehr als %s Knoten auf %s/# erkannt; nur die ersten werden übernommen",
+        MAX_NODES,
+        TOPIC_PREFIX,
+    )
+    return set(ordered[:MAX_NODES])
 
 
 def specs_for_node(specs: list[EntitySpec], node_id: str) -> list[EntitySpec]:
@@ -285,8 +311,14 @@ def device_info(node_id: str, manufacturer: str, model: str) -> dict[str, Any]:
     }
 
 
-def format_state(value: Any, spec: EntitySpec) -> str | None:
-    """Normalisiert einen Messwert auf einen Zustand im Koordinator."""
+def format_state(value: Any, spec: EntitySpec) -> str | int | float | None:
+    """Normalisiert einen Messwert auf den nativen Zustand im Koordinator.
+
+    Numerische Sensoren liefern echte Zahlen statt Strings. Home Assistant
+    erzeugt zwar auch aus numerischen Strings Statistiken, verliert dabei
+    aber den Typvertrag und die Präzision (``f"{value:g}"`` begrenzt auf
+    sechs signifikante Stellen). Binärsensoren bleiben bei ``on``/``off``.
+    """
     if value is None or isinstance(value, (dict, list)):
         return None
     if spec.platform == "binary_sensor":
@@ -299,8 +331,16 @@ def format_state(value: Any, spec: EntitySpec) -> str | None:
             return "off"
         return None
     if isinstance(value, bool):
-        return "1" if value else "0"
+        return int(value)
     if isinstance(value, (int, float)):
-        return f"{value:g}"
+        return value
     text = str(value).strip()
-    return text or None
+    if not text:
+        return None
+    if spec.platform == "sensor":
+        try:
+            number = float(text)
+        except ValueError:
+            return text
+        return int(number) if number.is_integer() else number
+    return text
