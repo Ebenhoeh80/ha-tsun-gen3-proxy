@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_NODE_ID, DEFAULT_AT_RATE_LIMIT, DOMAIN
+from .const import CONF_NODE_ID, DEFAULT_AT_RATE_LIMIT, DOMAIN, PROXY_NODE
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
 from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
@@ -33,7 +33,9 @@ async def async_setup_entry(
         return float(entry.options.get(spec.suffix, fallback))
 
     def _add_new() -> None:
-        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID))
+        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID)) - {
+            PROXY_NODE
+        }
         new_nodes = nodes - known
         if not new_nodes:
             return

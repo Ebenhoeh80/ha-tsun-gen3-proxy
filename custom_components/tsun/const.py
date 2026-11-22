@@ -31,6 +31,7 @@ DEFAULT_AT_RATE_LIMIT = 0
 
 TOPIC_PREFIX = "tsun"
 TOPIC_STATUS = "status"
+PROXY_NODE = "proxy"
 
 # Messwerte (Schlüssel des Upstream-Proxys)
 SENSOR_RATED_POWER = "rated_power"

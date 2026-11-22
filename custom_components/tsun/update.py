@@ -7,10 +7,17 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_LATEST_VERSION, CONF_NODE_ID, DEFAULT_VERSION, DOMAIN, VERSION
+from .const import (
+    CONF_LATEST_VERSION,
+    CONF_NODE_ID,
+    DEFAULT_VERSION,
+    DOMAIN,
+    PROXY_NODE,
+    VERSION,
+)
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
+from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes, sanitize
 
 _PLATFORM = "update"
 
@@ -20,7 +27,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Erzeugt eine Update-Entität, sobald ein Knoten bekannt ist."""
+    """Erzeugt eine Update-Entität, sobald ein Wechselrichter bekannt ist."""
     coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
     specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
     if not specs:
@@ -33,7 +40,9 @@ async def async_setup_entry(
         nonlocal known_node
         if known_node is not None:
             return
-        nodes = discovered_nodes(coordinator.data, configured)
+        # Der Pseudoknoten `proxy` enthält nur Diagnosewerte des Proxys,
+        # keine Integrationsversion. Er darf die Entität nicht anlegen.
+        nodes = discovered_nodes(coordinator.data, configured) - {PROXY_NODE}
         if not nodes:
             return
         known_node = configured if configured in nodes else min(nodes)
@@ -65,8 +74,12 @@ class TsunUpdate(TsunEntity, UpdateEntity):
         spec: EntitySpec,
         latest: str,
     ) -> None:
-        """Initialisiert die Update-Entität."""
+        """Initialisiert die Update-Entität mit stabiler ID ohne Knotenbezug."""
         super().__init__(coordinator, entry_id, node_id, spec)
+        # Die Version gehört zur Integration, nicht zu einem Wechselrichter.
+        # Ohne den Knoten in der Unique-ID bleibt die Entität beim Neustart
+        # stabil, auch wenn ein anderer Knoten zuerst Daten liefert.
+        self._attr_unique_id = f"{sanitize(entry_id)}_{spec.suffix}"
         self._attr_installed_version = VERSION
         self._attr_latest_version = latest or DEFAULT_VERSION
         self._attr_release_summary = "Release-Hinweise auf GitHub"

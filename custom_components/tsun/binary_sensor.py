@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import CONF_NODE_ID, DOMAIN
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
+from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes, specs_for_node
 
 _PLATFORM = "binary_sensor"
 
@@ -38,7 +38,7 @@ async def async_setup_entry(
             [
                 TsunBinarySensor(coordinator, entry.entry_id, node, spec)
                 for node in sorted(new_nodes)
-                for spec in specs
+                for spec in specs_for_node(specs, node)
             ]
         )
 

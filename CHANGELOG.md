@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Einrichtungsdialog auf eine Bestätigung reduziert: keine Abfrage von MQTT-Host, -Port, Zugangsdaten oder Knoten-ID mehr; die vorhandene HA-MQTT-Integration und die automatische Knotenerkennung werden genutzt
 - Number-, Select- und Update-Entitäten werden wie die Sensoren für erkannte Knoten erzeugt; bestehende Einträge mit gespeicherter `node_id` behalten ihr Verhalten
 
+### Fixed
+
+- Der Pseudoknoten `proxy` erhält keine Wechselrichter-Summen und keine Steuerungs- oder Update-Entitäten mehr; dort bleiben nur Diagnosesensoren
+- Die Update-Entität nutzt eine stabile Unique-ID ohne Knotenbezug, damit nach einem Neustart keine verwaiste zweite Entität entsteht
+- Der alte Platzhalter `inverter` wird bei Legacy-Einträgen ignoriert, damit kein Phantom-Gerät entsteht
+- Diagnoseausgabe redigiert MQTT-Host, -Benutzer, -Passwort und die Unique-ID auch bei Legacy-Einträgen
+
 ## [0.2.1] - 2026-11-22
 
 ### Fixed

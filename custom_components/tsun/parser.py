@@ -15,9 +15,11 @@ from typing import Any
 from .const import (
     COMMAND_ACL_MODE,
     COMMAND_AT_RATE_LIMIT,
+    DEFAULT_NODE_ID,
     ENTITY_CATEGORY_CONFIG,
     ENTITY_CATEGORY_DIAGNOSTIC,
     NUMBER_AT_RATE_LIMIT,
+    PROXY_NODE,
     SELECT_ACL_MODE,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
@@ -247,13 +249,25 @@ def discovered_nodes(
     """Liefert erkannte Knoten aus MQTT-Daten und optional einen Legacy-Knoten.
 
     Neue Einträge enthalten keine Knoten-ID: Die Knoten ergeben sich aus den
-    verarbeiteten MQTT-Nachrichten. Bestehende Einträge mit gespeicherter
-    Knoten-ID behalten ihr Verhalten.
+    verarbeiteten MQTT-Nachrichten. Bestehende Einträge mit einer eigenen
+    Knoten-ID behalten ihr Verhalten; der alte Standardwert `inverter` wird
+    ignoriert, damit kein Platzhaltergerät entsteht.
     """
     nodes = {str(node) for node in (data or {}) if node}
-    if configured_node:
+    if configured_node and configured_node != DEFAULT_NODE_ID:
         nodes.add(configured_node)
     return nodes
+
+
+def specs_for_node(specs: list[EntitySpec], node_id: str) -> list[EntitySpec]:
+    """Liefert nur die Entitäten, die für einen Knoten sinnvoll sind.
+
+    Der Upstream veröffentlicht unter `proxy` nur Diagnosewerte. Dort dürfen
+    keine Wechselrichter-Summen und keine Steuerungsbefehle erzeugt werden.
+    """
+    if node_id != PROXY_NODE:
+        return specs
+    return [spec for spec in specs if not spec.groups or PROXY_NODE in spec.groups]
 
 
 def unique_id(entry_id: str, node_id: str, spec: EntitySpec) -> str:
