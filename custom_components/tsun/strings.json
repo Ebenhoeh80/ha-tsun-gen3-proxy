@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "TSUN-Gen3-Proxy verbinden",
+        "description": "Verbindung zum MQTT-Broker des TSUN-Gen3-Proxys einrichten.",
+        "data": {
+          "title": "Name der Integration",
+          "mqtt_host": "MQTT-Host",
+          "mqtt_port": "MQTT-Port",
+          "mqtt_user": "MQTT-Benutzer",
+          "mqtt_password": "MQTT-Passwort",
+          "node_id": "Knoten-ID des Wechselrichters",
+          "latest_version": "Bekannte neueste Version"
+        }
+      }
+    },
+    "error": {
+      "invalid_port": "Der MQTT-Port muss zwischen 1 und 65535 liegen."
+    },
+    "abort": {
+      "already_configured": "Dieser MQTT-Broker ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "TSUN-Gen3-Proxy-Optionen",
+        "description": "Laufzeitoptionen der Integration anpassen.",
+        "data": {
+          "at_rate_limit": "AT-Befehlsrate (Befehle pro Minute)",
+          "latest_version": "Bekannte neueste Version"
+        }
+      }
+    }
+  }
+}
