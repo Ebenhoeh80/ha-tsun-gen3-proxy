@@ -241,6 +241,21 @@ def spec_for_key(key: str, group: str | None = None) -> EntitySpec | None:
     return spec
 
 
+def discovered_nodes(
+    data: dict[str, dict[str, Any]] | None, configured_node: str | None = None
+) -> set[str]:
+    """Liefert erkannte Knoten aus MQTT-Daten und optional einen Legacy-Knoten.
+
+    Neue Einträge enthalten keine Knoten-ID: Die Knoten ergeben sich aus den
+    verarbeiteten MQTT-Nachrichten. Bestehende Einträge mit gespeicherter
+    Knoten-ID behalten ihr Verhalten.
+    """
+    nodes = {str(node) for node in (data or {}) if node}
+    if configured_node:
+        nodes.add(configured_node)
+    return nodes
+
+
 def unique_id(entry_id: str, node_id: str, spec: EntitySpec) -> str:
     """Baut eine stabile eindeutige ID für eine Entität."""
     return sanitize(f"{entry_id}_{node_id}_{spec.suffix}")

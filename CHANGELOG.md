@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 ### Changed
 
 - Lizenz der Integration von Apache-2.0 auf MIT umgestellt (Nutzerentscheidung 2026-11-22); die Lizenz des Upstream-TSUN-Gen3-Proxys bleibt unverändert
+- Einrichtungsdialog auf eine Bestätigung reduziert: keine Abfrage von MQTT-Host, -Port, Zugangsdaten oder Knoten-ID mehr; die vorhandene HA-MQTT-Integration und die automatische Knotenerkennung werden genutzt
+- Number-, Select- und Update-Entitäten werden wie die Sensoren für erkannte Knoten erzeugt; bestehende Einträge mit gespeicherter `node_id` behalten ihr Verhalten
 
 ## [0.2.1] - 2026-11-22
 

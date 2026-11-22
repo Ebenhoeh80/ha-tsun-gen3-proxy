@@ -8,10 +8,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_NODE_ID, DEFAULT_NODE_ID, DOMAIN
+from .const import CONF_NODE_ID, DOMAIN
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec
+from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
 
 _PLATFORM = "select"
 
@@ -21,21 +21,31 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Erzeugt die Auswahl-Entitäten."""
+    """Erzeugt Auswahl-Entitäten für alle erkannten Knoten."""
     coordinator: TsunCoordinator = hass.data[DOMAIN][entry.entry_id]
-    node_id = entry.data.get(CONF_NODE_ID, DEFAULT_NODE_ID)
     specs = [spec for spec in ENTITY_SPECS if spec.platform == _PLATFORM]
+    known: set[str] = set()
 
-    entities: list[TsunSelect] = []
-    for spec in specs:
-        default = spec.options[0] if spec.options else ""
-        initial = str(entry.options.get(spec.suffix, default))
-        entities.append(
-            TsunSelect(coordinator, entry.entry_id, node_id, spec, initial)
+    def _initial(spec: EntitySpec) -> str:
+        fallback = spec.options[0] if spec.options else ""
+        return str(entry.options.get(spec.suffix, fallback))
+
+    def _add_new() -> None:
+        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID))
+        new_nodes = nodes - known
+        if not new_nodes:
+            return
+        known.update(new_nodes)
+        async_add_entities(
+            [
+                TsunSelect(coordinator, entry.entry_id, node, spec, _initial(spec))
+                for node in sorted(new_nodes)
+                for spec in specs
+            ]
         )
 
-    if entities:
-        async_add_entities(entities)
+    _add_new()
+    entry.async_on_unload(coordinator.async_add_listener(_add_new))
 
 
 class TsunSelect(TsunEntity, SelectEntity):

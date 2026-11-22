@@ -8,21 +8,14 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
-from homeassistant.helpers.selector import selector
 
 from .const import (
     CONF_AT_RATE_LIMIT,
     CONF_LATEST_VERSION,
-    CONF_MQTT_HOST,
-    CONF_MQTT_PASSWORD,
-    CONF_MQTT_PORT,
-    CONF_MQTT_USER,
-    CONF_NODE_ID,
-    DEFAULT_HOST,
-    DEFAULT_NODE_ID,
-    DEFAULT_PORT,
+    DEFAULT_AT_RATE_LIMIT,
     DEFAULT_VERSION,
     DOMAIN,
+    NAME,
 )
 
 
@@ -35,42 +28,18 @@ class TsunConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Fragt die MQTT-Verbindung ab."""
-        errors: dict[str, str] = {}
+        """Bestätigt die Einrichtung über die vorhandene HA-MQTT-Integration."""
+        if self._async_current_entries():
+            return self.async_abort(reason="already_configured")
 
         if user_input is not None:
-            try:
-                port = int(user_input.get(CONF_MQTT_PORT, DEFAULT_PORT))
-                if not 1 <= port <= 65535:
-                    raise ValueError("Ungültiger Port")
-            except (TypeError, ValueError):
-                errors[CONF_MQTT_PORT] = "invalid_port"
-            else:
-                user_input[CONF_MQTT_PORT] = port
-                await self.async_set_unique_id(
-                    f"{user_input.get(CONF_MQTT_HOST, DEFAULT_HOST)}:{port}"
-                )
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=user_input.get("title", DOMAIN), data=user_input
-                )
+            await self.async_set_unique_id(DOMAIN)
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title=NAME, data={})
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_MQTT_HOST, default=DEFAULT_HOST): str,
-                    vol.Required(CONF_MQTT_PORT, default=DEFAULT_PORT): int,
-                    vol.Optional(CONF_MQTT_USER): str,
-                    vol.Optional(CONF_MQTT_PASSWORD): selector(
-                        {"text": {"type": "password"}}
-                    ),
-                    vol.Optional("title", default=DOMAIN): str,
-                    vol.Optional(CONF_NODE_ID, default=DEFAULT_NODE_ID): str,
-                    vol.Optional(CONF_LATEST_VERSION, default=DEFAULT_VERSION): str,
-                }
-            ),
-            errors=errors,
+            data_schema=vol.Schema({}),
         )
 
     @staticmethod
@@ -101,7 +70,7 @@ class TsunOptionsFlow(config_entries.OptionsFlow):
                 {
                     vol.Optional(
                         CONF_AT_RATE_LIMIT,
-                        default=current.get(CONF_AT_RATE_LIMIT, 0),
+                        default=current.get(CONF_AT_RATE_LIMIT, DEFAULT_AT_RATE_LIMIT),
                     ): vol.All(int, vol.Range(min=0, max=100)),
                     vol.Optional(
                         CONF_LATEST_VERSION,

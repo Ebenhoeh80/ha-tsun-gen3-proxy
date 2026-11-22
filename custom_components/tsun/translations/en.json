@@ -2,24 +2,12 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect TSUN Inverter",
-        "description": "Set up the connection to the MQTT broker of your Home Assistant installation.",
-        "data": {
-          "title": "Integration name",
-          "mqtt_host": "MQTT host",
-          "mqtt_port": "MQTT port",
-          "mqtt_user": "MQTT user",
-          "mqtt_password": "MQTT password",
-          "node_id": "Inverter node ID",
-          "latest_version": "Known latest version"
-        }
+        "title": "Set up TSUN Inverter",
+        "description": "The integration uses the MQTT integration already configured in Home Assistant. No broker credentials are needed; inverters appear automatically once the TSUN Gen3 proxy publishes data."
       }
     },
-    "error": {
-      "invalid_port": "The MQTT port must be between 1 and 65535."
-    },
     "abort": {
-      "already_configured": "This MQTT broker is already configured."
+      "already_configured": "TSUN Inverter is already set up."
     }
   },
   "options": {

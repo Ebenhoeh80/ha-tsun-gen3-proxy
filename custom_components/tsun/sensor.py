@@ -12,10 +12,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_NODE_ID, DEFAULT_NODE_ID, DOMAIN
+from .const import CONF_NODE_ID, DOMAIN
 from .coordinator import TsunCoordinator
 from .entity import TsunEntity
-from .parser import ENTITY_SPECS, EntitySpec
+from .parser import ENTITY_SPECS, EntitySpec, discovered_nodes
 
 _PLATFORM = "sensor"
 
@@ -31,8 +31,7 @@ async def async_setup_entry(
     known: set[str] = set()
 
     def _add_new() -> None:
-        nodes = set((coordinator.data or {}).keys())
-        nodes.add(entry.data.get(CONF_NODE_ID, DEFAULT_NODE_ID))
+        nodes = discovered_nodes(coordinator.data, entry.data.get(CONF_NODE_ID))
         new_nodes = nodes - known
         if not new_nodes:
             return

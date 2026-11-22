@@ -18,12 +18,27 @@ class _Entry:
         self.data = data
         self.options = options or {}
 
+    def async_on_unload(self, func):
+        """Stub: Aufräumen wird im Test nicht benötigt."""
+        return func
+
+
+class _Coordinator:
+    """Minimaler Koordinator-Ersatz mit einem erkannten Knoten."""
+
+    def __init__(self) -> None:
+        self.data: dict[str, dict[str, Any]] = {"inv_1": {}}
+
+    def async_add_listener(self, callback):
+        """Stub: kein Listener-Aufruf im Test."""
+        return lambda: None
+
 
 class _Hass:
     """Minimaler Home-Assistant-Ersatz."""
 
     def __init__(self) -> None:
-        self.data = {"tsun": {"entry1": object()}}
+        self.data = {"tsun": {"entry1": _Coordinator()}}
 
 
 def _latest(data: dict[str, Any], options: dict[str, Any] | None = None) -> tuple[str, str]:
