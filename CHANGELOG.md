@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Lizenz der Integration von Apache-2.0 auf MIT umgestellt (Nutzerentscheidung 2026-11-22); die Lizenz des Upstream-TSUN-Gen3-Proxys bleibt unverändert
 - Einrichtungsdialog auf eine Bestätigung reduziert: keine Abfrage von MQTT-Host, -Port, Zugangsdaten oder Knoten-ID mehr; die vorhandene HA-MQTT-Integration und die automatische Knotenerkennung werden genutzt
 - Number-, Select- und Update-Entitäten werden wie die Sensoren für erkannte Knoten erzeugt; bestehende Einträge mit gespeicherter `node_id` behalten ihr Verhalten
+- Upgrade-Hinweis: Wer v0.2.1 mit dem alten Standardknoten `inverter` nutzte, sieht nach dem Update die alte Update-Entität samt zugehörigem Gerät als „nicht verfügbar" in der HA-Entity-Registry. Der Platzhalter wird jetzt ignoriert und die Update-Entität hat eine knotunabhängige Unique-ID. Die verwaisten Einträge können manuell unter „Einstellungen → Geräte & Dienste → Entitäten/Geräte" entfernt werden; neue Erkenntnisse oder automatische Bereinigung sind für diese Version nicht vorgesehen.
 
 ### Fixed
 
@@ -19,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Die Update-Entität nutzt eine stabile Unique-ID ohne Knotenbezug, damit nach einem Neustart keine verwaiste zweite Entität entsteht
 - Der alte Platzhalter `inverter` wird bei Legacy-Einträgen ignoriert, damit kein Phantom-Gerät entsteht
 - Diagnoseausgabe redigiert MQTT-Host, -Benutzer, -Passwort und die Unique-ID auch bei Legacy-Einträgen
+- Der Koordinator wartet vor dem MQTT-Abonnement auf den Client (`async_wait_for_mqtt_client`, Vorgabe der Home-Assistant-Dokumentation); ohne Client wird das Setup über `ConfigEntryNotReady` später erneut versucht, statt beim Neustart die ersten Messwerte zu verlieren (Vorbild: HA-Core-Integration `silla_prism`)
+- Der Einrichtungsdialog bricht ohne verfügbaren MQTT-Client mit der verständlichen Meldung `mqtt_unavailable` ab, statt einen generischen Setup-Fehler zu erzeugen
 
 ## [0.2.1] - 2026-11-22
 

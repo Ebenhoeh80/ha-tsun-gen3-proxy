@@ -9,6 +9,7 @@ from typing import Any
 from homeassistant.components import mqtt
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import DOMAIN, LOGGER, TOPIC_PREFIX
@@ -35,7 +36,15 @@ class TsunCoordinator(DataUpdateCoordinator[DataT]):
         self._unsubscribe: Callable[[], None] | None = None
 
     async def async_setup(self) -> None:
-        """Abonniert alle Topics des Proxys über die HA-MQTT-Integration."""
+        """Abonniert alle Topics des Proxys über die HA-MQTT-Integration.
+
+        Laut Home-Assistant-Vorgabe muss vor dem eigenen Abonnieren auf den
+        MQTT-Client gewartet werden: `dependencies` lädt die MQTT-Integration,
+        garantiert aber nicht, dass deren Config Entry schon verbunden ist.
+        Ohne das Warten gehen beim Neustart die ersten Messwerte verloren.
+        """
+        if not await mqtt.async_wait_for_mqtt_client(self.hass):
+            raise ConfigEntryNotReady("MQTT-Client nicht verfügbar")
         self._unsubscribe = await mqtt.async_subscribe(
             self.hass,
             f"{TOPIC_PREFIX}/#",

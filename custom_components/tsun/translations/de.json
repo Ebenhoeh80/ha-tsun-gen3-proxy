@@ -7,7 +7,8 @@
       }
     },
     "abort": {
-      "already_configured": "TSUN Inverter ist bereits eingerichtet."
+      "already_configured": "TSUN Inverter ist bereits eingerichtet.",
+      "mqtt_unavailable": "Die MQTT-Integration ist nicht verfügbar. Bitte zuerst in Home Assistant einrichten und erneut versuchen."
     }
   },
   "options": {

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import sys
 import types
-from typing import Any
 
 
 def _package(name: str) -> types.ModuleType:
@@ -87,6 +86,15 @@ async def _async_publish(hass, topic, payload, **kwargs) -> None:
     """Stub für mqtt.async_publish."""
 
 
+async def _async_wait_for_mqtt_client(hass) -> bool:
+    """Stub: MQTT-Client in der Testumgebung als verfügbar annehmen."""
+    return True
+
+
+class _ConfigEntryNotReady(Exception):
+    """Stub für das HA-Retry-Signal beim Setup."""
+
+
 def _identity(value):
     """Stub für Enum-Konstruktoren."""
     return value
@@ -103,12 +111,14 @@ config_entries = _module(
 )
 _module("homeassistant.data_entry_flow", FlowResult=dict)
 _module("homeassistant.const", EntityCategory=object)
+_module("homeassistant.exceptions", ConfigEntryNotReady=_ConfigEntryNotReady)
 
 components = _package("homeassistant.components")
 _module(
     "homeassistant.components.mqtt",
     async_subscribe=_async_subscribe,
     async_publish=_async_publish,
+    async_wait_for_mqtt_client=_async_wait_for_mqtt_client,
 )
 _module(
     "homeassistant.components.sensor",

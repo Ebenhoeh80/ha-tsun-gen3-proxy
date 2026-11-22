@@ -6,6 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.components.mqtt import async_wait_for_mqtt_client
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 
@@ -35,6 +36,11 @@ class TsunConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[
         if user_input is not None:
             await self.async_set_unique_id(DOMAIN)
             self._abort_if_unique_id_configured()
+            # Ein leeres Formular bietet keine Möglichkeit, MQTT nachträglich
+            # einzurichten. Ohne Client wäre das Setup nur ein generischer
+            # Fehler -> klarer Abbruch mit Handlungsanweisung (vgl. HA-Core).
+            if not await async_wait_for_mqtt_client(self.hass):
+                return self.async_abort(reason="mqtt_unavailable")
             return self.async_create_entry(title=NAME, data={})
 
         return self.async_show_form(

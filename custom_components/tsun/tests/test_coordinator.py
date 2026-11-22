@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
+from unittest.mock import AsyncMock, patch
+
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from custom_components.tsun.coordinator import TsunCoordinator
 
@@ -82,3 +86,38 @@ def test_alte_topic_formats_funktionieren_weiter() -> None:
         _message("tsun//inv 1//total", '{"Daily_Generation":3.5}')
     )
     assert coordinator.data["inv 1"]["total_generation_today"] == "3.5"
+
+
+def test_setup_wartet_auf_mqtt_client() -> None:
+    """Ohne MQTT-Client wird der Setup-Versuch später wiederholt."""
+    coordinator = _coordinator()
+    with patch(
+        "custom_components.tsun.coordinator.mqtt.async_wait_for_mqtt_client",
+        new=AsyncMock(return_value=False),
+    ):
+        try:
+            asyncio.run(coordinator.async_setup())
+        except ConfigEntryNotReady:
+            pass
+        else:
+            raise AssertionError("ConfigEntryNotReady erwartet")
+    assert coordinator._unsubscribe is None
+
+
+def test_setup_abonniert_erst_nach_mqtt_client() -> None:
+    """Das Abonnement startet erst, wenn der Client verfügbar ist."""
+    coordinator = _coordinator()
+    unsubscribe = lambda: None
+    with (
+        patch(
+            "custom_components.tsun.coordinator.mqtt.async_wait_for_mqtt_client",
+            new=AsyncMock(return_value=True),
+        ),
+        patch(
+            "custom_components.tsun.coordinator.mqtt.async_subscribe",
+            new=AsyncMock(return_value=unsubscribe),
+        ) as subscribe,
+    ):
+        asyncio.run(coordinator.async_setup())
+    subscribe.assert_awaited_once()
+    assert coordinator._unsubscribe is unsubscribe
