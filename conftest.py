@@ -174,11 +174,7 @@ _module(
     NumberMode=SimpleNamespace(BOX="box"),
     RestoreNumber=_NumberEntity,
 )
-_module(
-    "homeassistant.components.select",
-    SelectEntity=_SelectEntity,
-    RestoreSelect=_SelectEntity,
-)
+_module("homeassistant.components.select", SelectEntity=_SelectEntity)
 _module("homeassistant.components.update", UpdateEntity=_Base)
 
 helpers = _package("homeassistant.helpers")
@@ -189,6 +185,7 @@ _module(
 _module("homeassistant.helpers.entity_platform", AddEntitiesCallback=object)
 _module("homeassistant.helpers.device_registry", DeviceInfo=lambda **kwargs: kwargs)
 _module("homeassistant.helpers.selector", selector=lambda schema: schema)
+_module("homeassistant.helpers.restore_state", RestoreEntity=_Base)
 _module(
     "homeassistant.helpers.aiohttp_client",
     async_get_clientsession=lambda hass: None,

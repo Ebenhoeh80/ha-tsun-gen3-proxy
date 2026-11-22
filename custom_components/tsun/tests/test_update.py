@@ -141,4 +141,5 @@ def test_manual_version_verhindert_github_abfrage() -> None:
 
 def test_fetch_release_ohne_session_kein_fehler() -> None:
     """Ohne HTTP-Session (Testumgebung) bleibt die Version unverändert."""
-    assert asyncio.run(async_fetch_release(object())) is None
+    hass: Any = object()
+    assert asyncio.run(async_fetch_release(hass)) is None

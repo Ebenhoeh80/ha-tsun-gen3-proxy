@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from homeassistant.components.select import RestoreSelect
+from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import CONF_NODE_ID, DOMAIN, PROXY_NODE
 from .coordinator import TsunCoordinator
@@ -50,7 +51,7 @@ async def async_setup_entry(
     entry.async_on_unload(coordinator.async_add_listener(_add_new))
 
 
-class TsunSelect(TsunEntity, RestoreSelect):
+class TsunSelect(TsunEntity, SelectEntity, RestoreEntity):
     """Auswahlwert, der per MQTT an den Proxy gesendet wird.
 
     Als ``RestoreSelect`` bleibt die getroffene Auswahl auch nach einem
