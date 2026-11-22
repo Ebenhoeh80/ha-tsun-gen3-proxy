@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "TSUN Inverter einrichten",
-        "description": "Die Integration nutzt die bereits eingerichtete MQTT-Integration von Home Assistant. Es sind keine Broker-Zugangsdaten nötig; Wechselrichter erscheinen automatisch, sobald der TSUN-Gen3-Proxy Messwerte veröffentlicht."
+        "description": "Die Integration nutzt die bereits eingerichtete MQTT-Integration von Home Assistant. Es sind keine Broker-Zugangsdaten nötig; Wechselrichter erscheinen automatisch, sobald TSUN Inverter Messwerte empfängt."
       }
     },
     "abort": {

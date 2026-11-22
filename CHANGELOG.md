@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
+## [0.2.3] - 2026-11-22
+
+### Fixed
+
+- Der Einrichtungsdialog nennt jetzt „TSUN Inverter" statt der alten Bezeichnung „TSUN-Gen3-Proxy" (Nutzerfund 22.11.2026); deutsche und englische Fassung sowie `strings.json` sind konsistent. Die Formulierung beschreibt korrekt, dass die Integration Messwerte empfängt.
+
 ## [0.2.2] - 2026-11-22
 
 ### Changed
