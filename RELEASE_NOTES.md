@@ -5,7 +5,7 @@
 - **Version:** 0.2.0
 - **Datum:** 2026-11-22
 - **Repository:** https://github.com/Ebenhoeh80/ha-tsun-gen3-proxy
-- **Voraussetzung:** Home Assistant 2024.1.0 oder neuer, konfigurierte MQTT-Integration
+- **Voraussetzung:** Home Assistant 2024.11.0 oder neuer, konfigurierte MQTT-Integration
 
 ## Hauptänderungen
 

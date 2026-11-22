@@ -6,7 +6,7 @@ Home-Assistant-Integration für TSUN-Gen3/Gen3+-Wechselrichter und Batterien. Si
 
 ## Voraussetzungen
 
-- Home Assistant 2024.1.0 oder neuer
+- Home Assistant 2024.11.0 oder neuer (wegen `ConfigFlowResult` und Koordinator-Config-Entry)
 - Die MQTT-Integration von Home Assistant muss konfiguriert sein
 - Ein laufender TSUN-Gen3-Proxy, der seine Daten an denselben Broker veröffentlicht (Standard-Topic `tsun/<knoten_id>/<gruppe>`)
 

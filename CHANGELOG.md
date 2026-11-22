@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Echte Entitäts-Plattformen: Sensor, Binärsensor, Number, Select und Update; neue Knoten zur Laufzeit
 - Konfigurationsdialog mit Unique-ID und Options-Ablauf, Diagnose mit Passwort-Redaktion
 - 15 aussagekräftige Logiktests, Ruff- und MyPy-Prüfung, HACS-Validierung
+- Mindestversion Home Assistant 2024.11.0 (`ConfigFlowResult`, Koordinator-Config-Entry)
 
 ### Changed
 
