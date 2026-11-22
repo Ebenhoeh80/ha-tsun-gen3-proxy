@@ -35,7 +35,12 @@ class _Base:
     """Stub-Basisklasse mit Generics-Unterstützung."""
 
     def __init__(self, *args, **kwargs) -> None:
-        """Stub: Konstruktorargumente verwerfen."""
+        """Stub: Konstruktorargumente verwerfen (bewusster Kompromiß).
+
+        Damit werden falsche Signaturen gegenüber der echten HA-API nicht
+        erkannt; dafür bleiben die Tests ohne installiertes Home Assistant
+        lauffähig. Attribute wie ``coordinator`` werden hier nicht gesetzt.
+        """
 
     def __init_subclass__(cls, **kwargs) -> None:
         """Erlaubt Klassenargumente wie ``domain=...``."""

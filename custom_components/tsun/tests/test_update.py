@@ -43,7 +43,9 @@ def _latest(data: dict[str, Any], options: dict[str, Any] | None = None) -> tupl
 
 def test_latest_version_aus_entry_data() -> None:
     """Ein gespeicherter Wert in `entry.data` hat Vorrang."""
-    installed, latest = _latest({CONF_LATEST_VERSION: "1.2.3"}, {"x": "y"})
+    installed, latest = _latest(
+        {CONF_LATEST_VERSION: "1.2.3"}, {CONF_LATEST_VERSION: "9.9.9"}
+    )
     assert installed == VERSION
     assert latest == "1.2.3"
 
