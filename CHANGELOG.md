@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 
+## [Unreleased]
+
+## [0.2.4] - 2026-11-22
+
+### Added
+
+- Die Update-Entität fragt das neueste GitHub-Release ab (alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung dynamisch an. Ein manuell gesetzter Wert in `entry.data`/Optionen bleibt als Offline-Fallback maßgeblich.
+
+### Changed
+
+- `at_rate_limit` nutzt jetzt `RestoreNumber`; `acl_mode` kombiniert `SelectEntity` und `RestoreEntity`. Gesetzte Werte überstehen einen HA-Neustart und werden auf gültige Wertebereiche geprüft. (Korrigiert 22.11.2026: die erste Fassung dieser Notiz nannte `RestoreSelect`; diese Klasse existiert in Home Assistant nicht.)
+- MQTT-Steuer-Kommandos werden mit `retain=False` veröffentlicht, damit veraltete Befehle nicht nach einem Proxy-Neustart erneut angewendet werden.
+
+### Fixed
+
+- Die Update-Entität zeigt nicht mehr dauerhaft eine statisch konfigurierte Version, sondern den tatsächlich verfügbaren Release-Stand.
+
 ## [0.2.3] - 2026-11-22
 
 ### Fixed
@@ -28,23 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 - Diagnoseausgabe redigiert MQTT-Host, -Benutzer, -Passwort und die Unique-ID auch bei Legacy-Einträgen
 - Der Koordinator wartet vor dem MQTT-Abonnement auf den Client (`async_wait_for_mqtt_client`, Vorgabe der Home-Assistant-Dokumentation); ohne Client wird das Setup über `ConfigEntryNotReady` später erneut versucht, statt beim Neustart die ersten Messwerte zu verlieren (Vorbild: HA-Core-Integration `silla_prism`)
 - Der Einrichtungsdialog bricht ohne verfügbaren MQTT-Client mit der verständlichen Meldung `mqtt_unavailable` ab, statt einen generischen Setup-Fehler zu erzeugen
-
-## [Unreleased]
-
-## [0.2.4] - 2026-11-22
-
-### Added
-
-- Die Update-Entität fragt das neueste GitHub-Release ab (alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung dynamisch an. Ein manuell gesetzter Wert in `entry.data`/Optionen bleibt als Offline-Fallback maßgeblich.
-
-### Changed
-
-- `at_rate_limit` und `acl_mode` sind jetzt `RestoreNumber`/`RestoreSelect`: gesetzte Werte überstehen einen HA-Neustart und werden auf gültige Wertebereiche geprüft.
-- MQTT-Steuer-Kommandos werden mit `retain=False` veröffentlicht, damit veraltete Befehle nicht nach einem Proxy-Neustart erneut angewendet werden.
-
-### Fixed
-
-- Die Update-Entität zeigt nicht mehr dauerhaft eine statisch konfigurierte Version, sondern den tatsächlich verfügbaren Release-Stand.
 
 ## [0.2.1] - 2026-11-22
 

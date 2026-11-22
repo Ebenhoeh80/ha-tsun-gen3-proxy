@@ -11,7 +11,7 @@
 
 Diese Version verbessert zwei Punkte nach Home-Assistant-Best-Practices:
 
-- **AT-Befehlsrate und Zugriffsmodus:** `at_rate_limit` und `acl_mode` sind jetzt `RestoreNumber` bzw. `RestoreSelect`. Ein gesetzter Wert bleibt nach einem HA-Neustart erhalten; unplausible gespeicherte Werte werden verworfen.
+- **AT-Befehlsrate und Zugriffsmodus:** `at_rate_limit` nutzt jetzt `RestoreNumber`, `acl_mode` kombiniert `SelectEntity` und `RestoreEntity`. Ein gesetzter Wert bleibt nach einem HA-Neustart erhalten; unplausible gespeicherte Werte werden verworfen. (Korrigiert 22.11.2026: die erste Fassung dieser Hinweise nannte `RestoreSelect`; diese Klasse existiert in Home Assistant nicht.)
 - **Neueste Version:** Die Update-Entität fragt das aktuelle GitHub-Release ab (bei Start und alle 6 Stunden) und zeigt Version, Release-Seite und Beschreibung an. Ein manuell gesetzter Wert in den Optionen bleibt als Offline-Fallback erhalten.
 - **Steuer-Kommandos:** MQTT-Befehle werden mit `retain=false` gesendet, damit ein alter Befehl nach einem Proxy-Neustart nicht erneut wirksam wird.
 
