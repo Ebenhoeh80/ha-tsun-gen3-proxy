@@ -22,7 +22,7 @@
 
 ### Prüfstand / Verifikation
 
-Lokal grün: 61 Tests, Ruff-Lint, Ruff-Format, MyPy und Coverage (76 % der Integrationsdateien). Dieselben Prüfungen sind als CI-Gates hinterlegt. Ein bestätigter grüner CI-Lauf für den Release-Commit lag zum Zeitpunkt des Tags noch nicht vor; diese Hinweise behaupten daher keinen grünen CI-Status.
+Lokal grün: 61 Tests, Ruff-Lint, Ruff-Format, MyPy und Coverage (76 % der Integrationsdateien). CI-Lauf `45051181152` für Commit `2e721df` nach dem Push grün ( Jobs `test`, `hacs`, `hassfest` ); nur nicht-blockierende Hinweise zu Manifest-Kategorien und Node-20-Actions. (bestätigt 22.11.2026)
 
 ### Installation und Upgrade
 

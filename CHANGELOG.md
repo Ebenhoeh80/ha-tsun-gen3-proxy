@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/en/).
 ### Documentation
 
 - Widersprüchliche Altaussagen (nicht existierende Klasse, nicht verifizierte CI-/Prüfstandsangaben und veraltete Versions-/Fixture-Hinweise) wurden mit Datum und Grund durchgestrichen statt gelöscht.
-- Verifikationsstatus: Die CI-Gates sind definiert; lokale Prüfungen sind grün. Ein bestätigter grüner CI-Lauf für den Release-Commit stand zum Zeitpunkt dieser Notiz noch aus und wird nach dem Push geprüft. Die Manifest-Version ist 0.3.0.
+- Verifikationsstatus: 61 Tests, 76 % Coverage, Ruff-Lint, Ruff-Format und MyPy lokal grün. CI-Lauf `45051181152` für Commit `2e721df` nach dem Push grün (Jobs `test`, `hacs`, `hassfest`); nur nicht-blockierende Hinweise zu Manifest-Kategorien und Node-20-Actions. Die Manifest-Version ist 0.3.0. (bestätigt 22.11.2026)
 
 ## [0.2.4] - 2026-11-22
 
