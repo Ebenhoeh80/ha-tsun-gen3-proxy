@@ -1,6 +1,7 @@
 # TSUN Inverter – Home-Assistant-Integration
 
 [![HACS Custom Repository](https://img.shields.io/badge/HACS-custom-orange.svg)](https://hacs.xyz/docs/repositories)
+[![Auf GitHub sponsern](https://img.shields.io/badge/%E2%9D%A4%20Auf%20GitHub%20sponsern-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Ebenhoeh80)
 
 Home-Assistant-Integration für TSUN-Gen3/Gen3+-Wechselrichter und Batterien. Sie liest die Messwerte des [TSUN-Gen3-Proxys](https://github.com/s-allius/tsun-gen3-proxy) über MQTT aus und stellt sie als native Home-Assistant-Entitäten bereit.
 
@@ -68,6 +69,26 @@ coverage report -m
 ```
 
 Die Tests importieren echte Home-Assistant-Klassen und laufen mit `pytest-homeassistant` (2026.11.2). Globale Fake-Module in `sys.modules` gibt es bewusst nicht; HA-Objekte werden dort, wo nötig, gezielt mit `unittest.mock` ersetzt. `--source` wird als Dateipfad angegeben: als Paketname würde Coverage `custom_components.tsun` vor Messbeginn importieren und fälschlich 0 % melden.
+
+## ❤️ Support this project
+
+<div align="center">
+
+**Ich entwickle und pflege dieses Projekt in meiner Freizeit und trage die laufenden Kosten selbst – meine Zeit, Strom, Werkzeuge und IT-Ausstattung.**
+
+Sponsoring ist freiwillig und begründet keinen Anspruch auf Support, Funktionen oder Antwortzeiten. Jeder Beitrag, egal wie klein, hilft. Vielen Dank! 🙏
+
+<a href="https://github.com/sponsors/Ebenhoeh80">
+  <img src="https://img.shields.io/badge/%E2%9D%A4%20Auf%20GitHub%20sponsern-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors" height="42">
+</a>
+<a href="https://www.paypal.com/pool/9p84qTHCFr?sr=wccr">
+  <img src="https://img.shields.io/badge/%E2%9D%A4%20Spenden%20via%20PayPal-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Spenden via PayPal" height="42">
+</a>
+<a href="https://buymeacoffee.com/daneben">
+  <img src="https://img.shields.io/badge/%E2%98%95%20Spendier%20mir%20einen%20Kaffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee" height="42">
+</a>
+
+</div>
 
 ## Lizenz
 
