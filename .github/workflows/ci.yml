@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -69,7 +69,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Hassfest validation
         # Gepinnt auf home-assistant/actions/hassfest@2026.11.0 (Stand 22.11.2026): offiziell dokumentiert ist @master, ein v1-Tag existiert nicht.
